@@ -1,0 +1,1 @@
+<?php include "add-product.php"; ?> and <?php include "upload.php"; ?>

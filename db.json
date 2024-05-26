@@ -1,0 +1,14 @@
+{
+    "users": [
+        {
+            "id": 1,
+            "username": "taylankose",
+            "email": "taylancankose@gmail.com",
+            "password": "$2y$10$j1wL520pKIADArJAIAWgPO7t95Ek8VxrsLMdtRdNlw16AtWW4Vfx.",
+            "is_admin": true
+        }
+    ],
+    "products": [
+
+    ]
+}
