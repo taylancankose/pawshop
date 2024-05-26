@@ -1,5 +1,7 @@
 <?php 
-require_once "libs/clientActions.php";
+require "libs/vars.php";
+
+require_once "libs/functions.php";
   
   if(isset($_POST["login"])){
     $email = $_POST["email"];

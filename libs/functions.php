@@ -44,21 +44,36 @@ function registerUser(string $username,string $email,string $password){
 }
 
 
-function createProduct(string $title, string $description, string $price, string $image){
-    $db = connectDb();
+function createProduct(string $title, string $description, int $price, string $image, int $stock = 1){
+    include "dbsettings.php";
 
-    array_push($db["products"], array(
-        "id" => count($db["products"]) + 1,
-        "title" => $title,
-        "description" => $description,
-        "price" => $price,
-        "image" => $image
-    ));
+    $query = "INSERT INTO products (title, description, price, image, stock) VALUES (?, ?, ?, ?, ?)";
+    $result = mysqli_prepare($connection, $query);
+    mysqli_stmt_bind_param($result, 'ssisi', $title, $description, $price, $image, $stock);
+    mysqli_stmt_execute($result);
+    mysqli_stmt_close($result);
+    mysqli_close($connection);
 
-    $myfile = fopen("db.json", "w");
-    fwrite($myfile, json_encode($db, JSON_PRETTY_PRINT));
-    fclose($myfile);
+    return $result;
 }
+
+function getProducts(){
+    include "dbsettings.php";
+    $query = "SELECT * FROM products";
+    $result = mysqli_query($connection,$query);
+    mysqli_close($connection);
+    
+    return $result;
+}
+
+// for safety and database compatibility
+function control_input($data){
+    $data = htmlspecialchars($data);
+    $data = stripslashes($data);
+
+    return $data;
+}
+
 
 
 

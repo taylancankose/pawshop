@@ -1,5 +1,7 @@
 <?php 
-require "libs/clientActions.php";
+require "libs/vars.php";
+
+require "libs/functions.php";
 
 if (isset($_POST["register"])) {
     $username = $_POST["username"];

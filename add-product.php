@@ -1,16 +1,55 @@
 <?php
+require "libs/vars.php";
+require "libs/functions.php";
 
-require "libs/clientActions.php";
+$title = $description = "";
+$price = 0;
+$title_err = $description_err = $price_err = $err = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $title = $_POST["title"];
-    $description = $_POST["description"];
-    $image = $_FILES["fileToUpload"]["name"];
-    $price = $_POST["price"];
+    $input_title = trim($_POST["title"]);
 
-    createProduct($title,  $description,  $price,  $image);
-    header('Location: index.php');
+    // error management
+    if(empty($input_title)){
+        $title_err = "Title can not be empty";
+    }else if(strlen($input_title) > 255){
+        $title_err = "Title can not be longer than 255 characters";
+    }else if(strlen($input_title) < 5){
+        $title_err = "Title can not be less than 5 characters";
+    }else {
+        $title = control_input($input_title);
+    }
+
+    $input_description = trim($_POST["description"]);
+    if(empty($input_description)){
+        $description_err = "Description can not be empty";
+    }else if(strlen($input_description) < 15){
+        $description_err = "Description can not be less than 15 characters";
+    }else {
+        $description = control_input($input_description);
+    }
+
+    $image = $_FILES["fileToUpload"]["name"];
+    echo $image;
+    $stock = isset($_POST["stock"]) && $_POST["stock"] == 1 ? 1 : 0;
+
+    $input_price = $_POST["price"];
+    if(empty($input_price)){
+        $price_err = "Price can not be empty";
+    }else if(strlen($input_price) == 0){
+        $price_err = "Price can not be 0";
+    }else {
+        $price = $input_price;
+    }
+
+    if(empty($title_err) && empty($price_err) && empty($description_err)){
+        if(createProduct($title,  $description,  $price, $image, $stock)){
+           if($image) header('Location: index.php');
+        }else{
+            $err = "A problem occured while creating a new product";
+        }
+    }
 }
 
 ?>
@@ -19,23 +58,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <?php include "views/_navbar.php" ?>
 
 <div class="container mt-4 justify-content-center align-items-center">
+    <?php if(!empty($err)) :?>
+    <div class="alert alert-danger">
+        <?php echo $err ?>
+    </div>
+    <?php endif; ?>
     <form class="gap-4" action="process.php" method="POST" enctype="multipart/form-data">
         <div class="form-group mb-4">
-            <label for="title" class="col-sm-2 col-form-label">Title</label>
+            <label for="title" class="col-sm-2 col-form-label">Product Title</label>
             <div class="col-sm-10">
-                <input type="text" name="title" class="form-control" id="title" placeholder="Product Title">
+            <input type="text" class="form-control <?php echo (!empty($title_err)) ? 'is-invalid':''?>" name="title" id="title" value="<?php echo $title?>">
+            <span class="invalid-feedback"><?php echo $title_err ?></span>
             </div>
         </div>
         <div class="form-group mb-4">
             <label for="description" class="col-sm-2 col-form-label">Description</label>
             <div class="col-sm-10">
-                <textarea type="text" class="form-control" name="description" id="description" placeholder="Product Description"></textarea>
+                <textarea  value="<?php echo $description?>" name="description" id="description" class="form-control  <?php echo (!empty($description_err)) ? 'is-invalid':''?>"></textarea>
+                <span class="invalid-feedback"><?php echo $description_err ?></span>
             </div>
         </div>
         <div class="form-group mb-4">
             <label for="price" class="col-sm-2 col-form-label">Price</label>
             <div class="col-sm-10">
-                <input type="number" name="price" class="form-control" id="price" placeholder="0">
+                <input type="number" class="form-control <?php echo (!empty($price_err)) ? 'is-invalid':''?>" name="price" id="price" value="<?php echo $price?>">
+                <span class="invalid-feedback"><?php echo $price_err ?></span>
             </div>
         </div>
         <div class="form-group mb-4">
@@ -44,8 +91,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <input type="file" class="form-control-file" id="upload" name="fileToUpload">
             </div>
         </div>
+        <div class="form-check mb-4 form-group">
+  <input class="form-check-input" type="checkbox" value="1" id="stock" name="stock" checked>
+  <label class="form-check-label" for="stock">
+    In Stock
+  </label>
+</div>
         <div class="form-group">
             <button type="submit" value="Upload" name="btnUpload" class="btn btn-primary mb-2">Add to Panel</button>
         </div>
 </form>
 </div>
+
+
+
+
+<?php include "views/_ckeditor.php" ?>

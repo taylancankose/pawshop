@@ -1,6 +1,7 @@
 <?php
+require "libs/vars.php";
 
-require_once "libs/clientActions.php"
+require_once "libs/functions.php"
 
 // if (!empty($_GET['q'])) {
 //     $keyword = $_GET['q'];
