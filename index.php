@@ -7,3 +7,5 @@
 
 
 
+<?php include "views/_footer.php" ;?>
+
