@@ -1,6 +1,7 @@
-<?php 
+<?php
 
-function connectDb(){
+function connectDb()
+{
     $mydb = fopen("db.json", "r");
     $size = filesize("db.json");
 
@@ -13,20 +14,21 @@ function connectDb(){
 function getUser(string $email){
     $userList = connectDb()["users"];
 
-    foreach($userList as $user){
-        if($user["email"] == $email){
+    foreach ($userList as $user) {
+        if ($user["email"] == $email) {
             return $user;
         }
     }
     return null;
 }
 
-function registerUser(string $username,string $email,string $password){
+function registerUser(string $username, string $email, string $password)
+{
     $db = connectDb();
 
     $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-    if(password_verify($password, $hashed_password)){
+    if (password_verify($password, $hashed_password)) {
         // db users array'ine pushla kullanıcıyı
         array_push($db["users"], array(
             "id" => count($db["users"]) + 1,
@@ -43,7 +45,8 @@ function registerUser(string $username,string $email,string $password){
     fclose($mydb);
 }
 
-function createProduct(string $title, string $description, int $price, string $image, int $stock = 1){
+function createProduct(string $title, string $description, int $price, string $image, int $stock = 1)
+{
     include "dbsettings.php";
 
     $query = "INSERT INTO products (title, description, price, image, stock) VALUES (?, ?, ?, ?, ?)";
@@ -56,37 +59,96 @@ function createProduct(string $title, string $description, int $price, string $i
     return $result;
 }
 
-function getProducts(){
+function getProducts()
+{
     include "dbsettings.php";
     $query = "SELECT * FROM products";
-    $result = mysqli_query($connection,$query);
+    $result = mysqli_query($connection, $query);
     mysqli_close($connection);
-    
+
     return $result;
 }
 
-function getProductById(int $id){
+function getCategories()
+{
+    include "dbsettings.php";
+    $query = "SELECT * FROM categories";
+    $result = mysqli_query($connection, $query);
+    mysqli_close($connection);
+
+    return $result;
+}
+
+function clearProductCategories(int $product_id){
+    include "dbsettings.php";
+    $query = "DELETE FROM product_category WHERE product_id = $product_id";
+    $result = mysqli_query($connection, $query);
+    echo mysqli_error($connection);
+
+    return $result;
+}
+
+function getProductById(int $id)
+{
     include "dbsettings.php";
 
     $query = "SELECT * FROM products WHERE id='$id'";
-    $result = mysqli_query($connection,$query);
+    $result = mysqli_query($connection, $query);
 
     mysqli_close($connection);
 
     return $result;
 }
 
-function uploadImage($file){
+function getCategoryById(int $id)
+{
+    include "dbsettings.php";
+
+    $query = "SELECT * FROM categories WHERE id=$id";
+    $result = mysqli_query($connection, $query);
+
+    mysqli_close($connection);
+
+    return $result;
+}
+
+function getCategoriesByProductId($id) {
+    include "dbsettings.php";
+
+    $query = "SELECT c.id, c.name 
+              FROM product_category pc 
+              INNER JOIN categories c ON pc.category_id = c.id 
+              WHERE pc.product_id = ?";
+    $stmt = mysqli_prepare($connection, $query);
+    mysqli_stmt_bind_param($stmt, 'i', $id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    mysqli_close($connection);
+    return $result;
+}
+
+
+function getProductsByCategoryId($id) {
+    include "dbsettings.php";
+
+    $query = "SELECT * FROM product_category pc INNER JOIN products p on pc.product_id=p.id WHERE pc.category_id=$id";
+    $result = mysqli_query($connection, $query);
+    mysqli_close($connection);
+    return $result;
+}
+
+function uploadImage($file)
+{
     $message = "";
     $uploadOK = 1;
     $fileTempPath = $file["tmp_name"];
     $fileName = $file["name"];
     $fileSize = $file["size"];
     $maxfileSize = ((1024 * 1024) * 1);
-    $fileExtensions = array("jpg","jpeg","png");
+    $fileExtensions = array("jpg", "jpeg", "png");
     $file_path = "./uploads/";
 
-    if($fileSize > $maxfileSize){
+    if ($fileSize > $maxfileSize) {
         $message = "File size is too big";
         $uploadOK = 0;
     }
@@ -94,16 +156,16 @@ function uploadImage($file){
     $fileName_without_extension = $fileName_arr['filename'];
     $file_extention = isset($fileName_arr['extension']) ? $fileName_arr['extension'] : '';
 
-    if(!in_array($file_extention,$fileExtensions)){
+    if (!in_array($file_extention, $fileExtensions)) {
         $message .= "Undefined file extension";
-        $message .= "Please upload only: ".implode(", ",$fileExtensions);
+        $message .= "Please upload only: " . implode(", ", $fileExtensions);
     }
     $new_file_name = md5(time() . $fileName_without_extension) . '.' . $file_extention;
-    $final_path = $file_path.$new_file_name;
-    if($uploadOK == 0){
+    $final_path = $file_path . $new_file_name;
+    if ($uploadOK == 0) {
         $message .= "Dosya yüklenemedi";
-    }else{
-        if(move_uploaded_file($fileTempPath, $final_path)){
+    } else {
+        if (move_uploaded_file($fileTempPath, $final_path)) {
             $message .= "dosya yüklendi.";
         }
     }
@@ -115,32 +177,126 @@ function uploadImage($file){
     );
 }
 
-function editProduct(int $id, string $title, string $description, int $price, string $image, int $stock = 1){
+function editProduct(int $id, string $title, string $description, int $price, string $image, int $stock = 1)
+{
     include "dbsettings.php";
 
     $title = mysqli_real_escape_string($connection, $title);
     $description = mysqli_real_escape_string($connection, $description);
 
     $query = "UPDATE products SET title='$title', description='$description', price=$price, image='$image', stock=$stock WHERE id=$id";
-    $result = mysqli_query($connection,$query);
+    $result = mysqli_query($connection, $query);
     echo mysqli_error($connection);
 
     return $result;
 }
 
-function deleteProduct(int $id){
+function editCategory(int $id, string $name, int $is_active)
+{
+    include "dbsettings.php";
+
+    $query = "UPDATE categories SET name='$name', is_active='$is_active' WHERE id=$id";
+    $result = mysqli_query($connection, $query);
+    echo mysqli_error($connection);
+
+    return $result;
+}
+
+function deleteProduct(int $id)
+{
     include "dbsettings.php";
     $query = "DELETE FROM products WHERE id=$id";
     $result = mysqli_query($connection, $query);
     return $result;
 }
 
+function deleteCategory(int $id)
+{
+    include "dbsettings.php";
+    $query = "DELETE FROM categories WHERE id=$id";
+    $result = mysqli_query($connection, $query);
+    return $result;
+}
+
+function createCategory(string $name)
+{
+    include "dbsettings.php";
+
+    $check_category_query = "SELECT * FROM categories WHERE name= ?";
+    $check_stmt = mysqli_prepare($connection, $check_category_query);
+
+    if ($check_stmt === false) {
+        die('Prepare for check failed: ' . htmlspecialchars(mysqli_error($connection)));
+    }
+    mysqli_stmt_bind_param($check_stmt, 's', $name);
+    mysqli_stmt_execute($check_stmt);
+    mysqli_stmt_store_result($check_stmt);
+
+    if (mysqli_stmt_num_rows($check_stmt) > 0) {
+        mysqli_stmt_close($check_stmt);
+        mysqli_close($connection);
+        return false; // Category already exists
+    }
+
+
+    $query = "INSERT INTO categories (name) VALUES (?)";
+    $stmt = mysqli_prepare($connection, $query);
+
+    if ($stmt === false) {
+        die('Prepare failed: ' . htmlspecialchars(mysqli_error($connection)));
+    }
+
+    mysqli_stmt_bind_param($stmt, 's', $name);
+    $execute_result = mysqli_stmt_execute($stmt);
+
+    if ($execute_result === false) {
+        die('Execute failed: ' . htmlspecialchars(mysqli_stmt_error($stmt)));
+    }
+
+    mysqli_stmt_close($stmt);
+    mysqli_close($connection);
+
+    return $execute_result;
+}
+
+function addProductToCategories(int $product_id, array $categories){
+    include 'dbsettings.php';
+
+    $query = "";
+    foreach($categories as $category){
+        $query .= "INSERT INTO product_category(product_id, category_id) VALUES($product_id, $category);";
+    }
+    $result = mysqli_multi_query($connection, $query);
+
+    echo mysqli_error($connection);
+
+    return $result;
+}
+
 // for safety and database compatibility
-function control_input($data){
+function control_input($data)
+{
     $data = htmlspecialchars($data);
     $data = stripslashes($data);
 
     return $data;
+}
+
+function isLoggedIn(){
+    if(isset($_SESSION["loggedIn"]) && $_SESSION["loggedIn"] === true){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+function isAdmin(){
+    // ilk önce giriş yap sonra kontrol et
+    if(isLoggedIn() && isset($_SESSION["user_type"]) && $_SESSION["user_type"] === "admin"){
+        return true;
+    }else{
+        return false;
+    }
 }
 
 ?>

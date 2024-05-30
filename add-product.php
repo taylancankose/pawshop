@@ -2,9 +2,16 @@
 require "libs/vars.php";
 require "libs/functions.php";
 
+if (!isAdmin()) {
+    header("Location: index.php");
+    exit;
+}
+
 $title = $description = $image = "";
 $price = 0;
 $title_err = $description_err = $price_err = $err = $image_err = "";
+
+$categories = getCategories();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
@@ -32,11 +39,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (empty($_FILES["image"]["name"])) {
         $image_err = "Please select an image";
-    }else{
+    } else {
         $result = uploadImage($_FILES["image"]);
-        if($result["isSuccess"] == 0){
+        if ($result["isSuccess"] == 0) {
             $image_err = $result["message"];
-        }else {
+        } else {
             $image = $result["image"];
         }
     }
@@ -74,43 +81,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     <?php endif; ?>
     <form class="gap-4" action="add-product.php" method="POST" enctype="multipart/form-data">
-        <div class="form-group mb-4">
-            <label for="title" class="col-sm-2 col-form-label">Product Title</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control <?php echo (!empty($title_err)) ? 'is-invalid' : '' ?>" name="title" id="title" value="<?php echo $title ?>">
-                <span class="invalid-feedback"><?php echo $title_err ?></span>
+        <div class="row">
+            <div class="col-12">
+                <div class="form-group mb-4">
+                    <label for="title" class="col-sm-2 col-form-label">Product Title</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control <?php echo (!empty($title_err)) ? 'is-invalid' : '' ?>" name="title" id="title" value="<?php echo $title ?>">
+                        <span class="invalid-feedback"><?php echo $title_err ?></span>
+                    </div>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="description" class="col-sm-2 col-form-label">Description</label>
+                    <div class="col-sm-10">
+                        <textarea value="<?php echo $description ?>" name="description" id="description" class="form-control  <?php echo (!empty($description_err)) ? 'is-invalid' : '' ?>"></textarea>
+                        <span class="invalid-feedback"><?php echo $description_err ?></span>
+                    </div>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="price" class="col-sm-2 col-form-label">Price</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control <?php echo (!empty($price_err)) ? 'is-invalid' : '' ?>" name="price" id="price" value="<?php echo $price ?>">
+                        <span class="invalid-feedback"><?php echo $price_err ?></span>
+                    </div>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="upload">Product Image</label>
+                    <div class="col-sm-10 mt-2">
+                        <input type="file" class="form-control <?php echo (!empty($image_err)) ? 'is-invalid' : '' ?>" name="image" id="image">
+                        <span class="invalid-feedback"><?php echo $image_err ?></span>
+                    </div>
+                </div>
+                <div class="form-check mb-4 form-group">
+                    <input class="form-check-input" type="checkbox" value="1" id="stock" name="stock" checked>
+                    <label class="form-check-label" for="stock">
+                        In Stock
+                    </label>
+                </div>
+                <div class="form-group">
+                    <button type="submit" value="Upload" name="btnUpload" class="btn btn-primary mb-2">Add to Panel</button>
+                </div>
             </div>
-        </div>
-        <div class="form-group mb-4">
-            <label for="description" class="col-sm-2 col-form-label">Description</label>
-            <div class="col-sm-10">
-                <textarea value="<?php echo $description ?>" name="description" id="description" class="form-control  <?php echo (!empty($description_err)) ? 'is-invalid' : '' ?>"></textarea>
-                <span class="invalid-feedback"><?php echo $description_err ?></span>
-            </div>
-        </div>
-        <div class="form-group mb-4">
-            <label for="price" class="col-sm-2 col-form-label">Price</label>
-            <div class="col-sm-10">
-                <input type="number" class="form-control <?php echo (!empty($price_err)) ? 'is-invalid' : '' ?>" name="price" id="price" value="<?php echo $price ?>">
-                <span class="invalid-feedback"><?php echo $price_err ?></span>
-            </div>
-        </div>
-        <div class="form-group mb-4">
-            <label for="upload">Product Image</label>
-            <div class="col-sm-10 mt-2">
-                <input type="file" class="form-control <?php echo (!empty($image_err)) ? 'is-invalid' : '' ?>" name="image" id="image">
-                <span class="invalid-feedback"><?php echo $image_err ?></span>
-            </div>
-        </div>
-        <div class="form-check mb-4 form-group">
-            <input class="form-check-input" type="checkbox" value="1" id="stock" name="stock" checked>
-            <label class="form-check-label" for="stock">
-                In Stock
-            </label>
-        </div>
-        <div class="form-group">
-            <button type="submit" value="Upload" name="btnUpload" class="btn btn-primary mb-2">Add to Panel</button>
-        </div>
     </form>
 </div>
 

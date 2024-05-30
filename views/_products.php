@@ -25,7 +25,9 @@ $result = getProducts();
         <!-- Top Nav -->
         <div class="d-flex justify-content-between align-items-center">
             <h3 class="">Pet Products</h3>
-            <button type="button" class="btn btn-lg btn-primary btn-lg " style="width: 20%;">Shop Now</button>
+            <div>
+                <p class="" style="">Shop Now</p>
+            </div>
         </div>
         <div class="d-flex justify-content-between mb-4" style="flex-wrap: wrap; margin-bottom: 12em;">
             <?php while ($product = mysqli_fetch_assoc($result)) : ?>

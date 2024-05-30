@@ -16,7 +16,7 @@ require_once "libs/functions.php"
             </ul>
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a href="blog-create.php" class="nav-link">Home</a>
+                    <a href="index.php" class="nav-link">Home</a>
                 </li>
                 <li class="nav-item">
                     <a href="admin-blogs.php" class="nav-link">Shop</a>
@@ -26,17 +26,17 @@ require_once "libs/functions.php"
                 </li>
             </ul>
             <ul class="navbar-nav mb-2 mb-lg-0">
-                <?php if (isset($_COOKIE["auth"])) : ?>
+                <?php if (isset($_SESSION["loggedIn"])) : ?>
                     <li class="nav-item">
                         <a href="logout.php" class="nav-link">Logout</a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">My Account</a>
+                        <a href="#" class="nav-link"><?php echo $_SESSION["username"] ?> My Account</a>
                     </li>
                     </li>
                     <?php
-                    $user = getUser($_COOKIE["auth"]["email"]);
-                    if ($user["is_admin"]) {
+                    $user = getUser($_SESSION["username"]);
+                    if ($_SESSION["user_type"] == "admin") {
                         echo "<li class='nav-item dropdown'>
                         <a class='nav-link dropdown-toggle' href='#' id='navbarDropdown' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
                         Shop Operations
@@ -45,7 +45,8 @@ require_once "libs/functions.php"
                             <a href='add-product.php' class='dropdown-item'>Add Product</a>
                             <a class='dropdown-item' href='admin-products.php'>Manage Products</a>
                             <div class='dropdown-divider'></div>
-                            <a class='dropdown-item' href='#'>Something else here</a>
+                            <a class='dropdown-item ' href='add-category.php'>Add Category</a>
+                            <a class='dropdown-item ' href='admin-categories.php'>Manage Categories</a>
                           </div>
                         </li>";
                     } else {

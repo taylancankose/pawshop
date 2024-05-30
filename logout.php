@@ -1,7 +1,12 @@
-<?php 
+<?php
 
-    setcookie("auth[email]","", time() - (60*60));
-    setcookie("auth[username]","", time() - (60*60));
+session_start();
 
-    header('Location: index.php');
+$_SESSION = array();
+
+session_destroy();
+
+header('Location: login.php');
+exit; 
+
 ?>
