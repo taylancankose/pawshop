@@ -1,19 +1,20 @@
 <?php
-require "libs/vars.php";
-require "libs/functions.php";
+    include_once 'classes/db.class.php';
+    include_once 'classes/product.class.php';
+require_once "classes/vars.php";
 
-if(!isAdmin()){
-    header("Location: index.php");
-    exit;
-}
+// if(!isAdmin()){
+//     header("Location: index.php");
+//     exit;
+// }
 
-$result = getProducts();
-$products = mysqli_fetch_all($result, MYSQLI_ASSOC);
+$product = new Products();
+
 ?>
 
 
-<?php include "views/_header.php" ?>
-<?php include "views/_navbar.php" ?>
+<?php include_once "views/_header.php" ?>
+<?php include_once "views/_navbar.php" ?>
 
 
 <div class="container">
@@ -29,33 +30,33 @@ $products = mysqli_fetch_all($result, MYSQLI_ASSOC);
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($products as $product) : ?>
+            <?php $products= $product->getProducts(); foreach ($products as $item) : ?>
                 <tr class="align-middle">
                     <td class="table-user">
-                        <img src="uploads/<?php echo $product["image"] ?>" alt="table-user" class="me-2 rounded-circle" style="height: 3em; width:3em; object-fit: cover;" />
+                        <img src="uploads/<?php echo $item->image ?>" alt="table-user" class="me-2 rounded-circle" style="height: 3em; width:3em; object-fit: cover;" />
                     </td>
                     <td>
-                        <a class="text-decoration-none text-dark" href="product-details.php?id=<?php echo $product['id'] ?>"><?php echo $product["title"] ?></a>
+                        <a class="text-decoration-none text-dark" href="product-details.php?id=<?php echo $item->id ?>"><?php echo $item->title ?></a>
                     </td>
                     <td>
                     <?php echo "<ul>";
-                        $selected_categories = getCategoriesByProductId($product["id"]);
-                        if (mysqli_num_rows($selected_categories) > 0) {
-                            while($category = mysqli_fetch_assoc($selected_categories)) {
-                                echo "<li>".$category["name"]."</li>";
+                        $selected_categories = $product->getCategoriesByProductId($item->id);
+                        if (count($selected_categories) > 0) {
+                            foreach($selected_categories as $category) {
+                                echo "<li>".$category->name."</li>";
                             }
                             }else {
                                 echo "<li>No category selected</li>";
                             }
-                            echo "</ul>";                                
+                            echo "</ul>";              
                     ?>    
                     </td>
-                    <td><?php echo $product["price"] ?></td>
-                    <td><?php echo $product["stock"] ?></td>
+                    <td><?php echo $item->price ?></td>
+                    <td><?php echo $item->stock ?></td>
                     <td class="table-action">
-                        <a href="edit-product.php?id=<?php echo $product["id"] ?>" class="action-icon"> <i class="fa fa-pencil me-3" aria-hidden="true"></i>
+                        <a href="edit-product.php?id=<?php echo $item->id ?>" class="action-icon text-dark"> <i class="fa-solid fa-pen-to-square me-4"></i></i>
                         </a>
-                        <a href="delete-product.php?id=<?php echo $product["id"] ?>" class="action-icon"> <i class="fa fa-trash-o" aria-hidden="true"></i>
+                        <a href="delete-product.php?id=<?php echo $item->id ?>" class="action-icon text-danger"> <i class="fa fa-trash" aria-hidden="true"></i>
                         </a>
                     </td>
                 </tr>

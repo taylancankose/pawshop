@@ -1,8 +1,8 @@
 <?php
-require "libs/vars.php";
+require_once "classes/vars.php";
+require_once "classes/product.class.php";
 
-require_once "libs/functions.php"
-
+$product = new Products()
 ?>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -19,7 +19,7 @@ require_once "libs/functions.php"
                     <a href="index.php" class="nav-link">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a href="admin-blogs.php" class="nav-link">Shop</a>
+                    <a href="shop.php" class="nav-link">Shop</a>
                 </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link">About Us</a>
@@ -31,11 +31,11 @@ require_once "libs/functions.php"
                         <a href="logout.php" class="nav-link">Logout</a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link"><?php echo $_SESSION["username"] ?> My Account</a>
+                        <a class="nav-link"><?php echo $_SESSION["username"] ?> My Account</a>
                     </li>
                     </li>
                     <?php
-                    $user = getUser($_SESSION["username"]);
+                    $user = $product->getUser($_SESSION["username"]);
                     if ($_SESSION["user_type"] == "admin") {
                         echo "<li class='nav-item dropdown'>
                         <a class='nav-link dropdown-toggle' href='#' id='navbarDropdown' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>

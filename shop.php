@@ -1,6 +1,7 @@
 <?php
- include_once 'classes/product.class.php';
- 
+include_once 'classes/product.class.php';
+
+$product = new Products();
 
 $categoryId = "";
 $keyword = "";
@@ -38,26 +39,11 @@ if (!empty($_GET['cats'])) {
     }
 </style>
 
-
+<?php include_once "views/_header.php" ?>
+<?php include_once "views/_navbar.php" ?>
 
 <div class="container">
-    <div class="d-flex justify-content-between align-items-center">
-        <h3 class="">Pet Products</h3>
-        <div class="d-flex align-items-center justify-content-center align-middle">
-            <form method="GET" action="" class="d-flex">
-                <select class="form-select me-2" aria-label="Default select example" name="cats">
-                    <option value="">Select</option>
-                    <?php foreach ($product->getCategories() as $c) : ?>
-                        <option value="<?php echo $c->id ?>" <?php echo ($categoryId == $c->id) ? 'selected' : ''; ?>>
-                            <?php echo $c->name ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-                <button type="submit" class="btn btn-primary me-1" style="width:12em;">Filter</button>
-            </form>
-        </div>
-    </div>
-    <div class="d-flex justify-content-center mb-4" style="flex-wrap: wrap; margin-bottom: 12em;">
+    <div class="d-flex justify-content-center align-items-center mb-4" style="flex-wrap: wrap; margin-bottom: 12em;">
         <?php if (!empty($filtered_products)) : ?>
             <?php foreach ($filtered_products as $item) : ?>
                 <?php if($item->stock) :?>
@@ -124,3 +110,5 @@ if (!empty($_GET['cats'])) {
 </nav>
 
 <?php endif; ?>
+
+

@@ -1,16 +1,16 @@
 <?php
+include_once 'classes/db.class.php';
+include_once 'classes/product.class.php';
+require_once "classes/vars.php";
 
-    require "libs/vars.php";
-    require "libs/functions.php";
+$product = new Products();
 
-    $id = $_GET["id"];
-    echo $id;
-    if (deleteProduct($id)) {
-        echo "Product ID: " . $id . "deleted";
-    
-        header('Location: admin-products.php');
-    } else {
-        echo "Error";
-    } 
+$id = $_GET["id"];
+echo $id;
+if ($product->deleteProduct($id)) {
+    echo "Product ID: " . $id . "deleted";
 
-?>
+    header('Location: admin-products.php');
+} else {
+    echo "Error";
+}

@@ -1,20 +1,22 @@
 <?php
+    include_once 'classes/db.class.php';
+    include_once 'classes/product.class.php';
 
-    require "libs/vars.php";
-    require "libs/functions.php";  
+    require_once "classes/vars.php";
 
     
-    if(!isAdmin()){
-        header("Location: index.php");
-        exit;
-    }
+    // if(!isAdmin()){
+    //     header("Location: index.php");
+    //     exit;
+    // }
 
+    $product = new Products();
 
 ?>
 
-<?php include "views/_header.php" ?>
-<?php include "views/_message.php" ?>
-<?php include "views/_navbar.php" ?>
+<?php include_once "views/_header.php" ?>
+<?php include_once "views/_message.php" ?>
+<?php include_once "views/_navbar.php" ?>
 
 <div class="container my-3">
 
@@ -38,23 +40,23 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php $result = getCategories();  while($item = mysqli_fetch_assoc($result)): ?>
+                    <?php $result = $product->getCategories();  foreach($result as $item): ?>
                         <tr>
-                            <td class="text-center"><?php echo $item["id"]?></td>
-                            <td><?php echo $item["name"]?></td>
+                            <td class="text-center"><?php echo $item->id?></td>
+                            <td><?php echo $item->name?></td>
                             <td class="text-center">
-                                <?php if($item["is_active"]): ?>
+                                <?php if($item->is_active): ?>
                                     <i class="fa fa-check"></i>
                                 <?php else: ?>
                                     <i class="fa fa-times"></i>
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <a class="btn btn-primary btn-sm" href="edit-categories.php?id=<?php echo $item["id"]?>">edit</a>
-                                <a class="btn btn-danger btn-sm" href="delete-category.php?id=<?php echo $item["id"]?>">delete</a>
+                                <a class="btn btn-primary btn-sm" href="edit-categories.php?id=<?php echo $item->id?>">edit</a>
+                                <a class="btn btn-danger btn-sm" href="delete-category.php?id=<?php echo $item->id?>">delete</a>
                             </td>
                         </tr>
-                    <?php endwhile; ?>
+                    <?php endforeach ; ?>
                 </tbody>
             </table>
             

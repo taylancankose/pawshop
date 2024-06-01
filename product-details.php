@@ -1,6 +1,11 @@
+
 <?php
-require "libs/vars.php";
-require "libs/functions.php";
+include_once 'classes/db.class.php';
+include_once 'classes/product.class.php';
+?>
+
+<?php
+require_once "classes/vars.php";
 
 if (!isset($_GET["id"]) or !is_numeric($_GET["id"])) {
     header("Location: index.php");
@@ -16,8 +21,8 @@ if (!$result) {
 ?>
 
 
-<?php include "views/_header.php" ?>
-<?php include "views/_navbar.php" ?>
+<?php include_once "views/_header.php" ?>
+<?php include_once "views/_navbar.php" ?>
 
 <body>
     
@@ -154,4 +159,4 @@ if (!$result) {
 
 
 
-<?php include "views/_footer.php"; ?>
+<?php include_once "views/_footer.php"; ?>

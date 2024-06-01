@@ -1,18 +1,22 @@
 <?php
+include_once 'classes/db.class.php';
+include_once 'classes/product.class.php';
+?>
 
-    require "libs/vars.php";
-    require "libs/functions.php";
+<?php
+require_once "classes/vars.php";
 
-    $id = $_GET["id"];
+$product = new Products();
+$id = $_GET["id"];
 
-    if (deleteCategory($id)) {
-        $_SESSION['message'] = $id." category deleted.";
-        $_SESSION['type'] = "danger";
-    
-        header('Location: admin-categories.php');
-    } else {
-        echo "Error";
-    } 
+if ($product->deleteCategory($id)) {
+    $_SESSION['message'] = "ID No:". $id . " category deleted.";
+    $_SESSION['type'] = "danger";
+
+    header('Location: admin-categories.php');
+} else {
+    echo "Error";
+}
 
 
 

@@ -1,14 +1,21 @@
 <?php
-require "libs/vars.php";
-require_once "libs/functions.php";
+include_once 'classes/db.class.php';
+include_once 'classes/product.class.php';
+?>
 
-if(!isAdmin()){
-    header("Location: index.php");
-    exit;
-}
+
+<?php
+require_once "classes/vars.php";
+
+// if(!isAdmin()){
+//     header("Location: index.php");
+//     exit;
+// }
 
 $categoryname = "";
 $categoryname_err = "";
+$product = new Products();
+
 
 if ($_SERVER["REQUEST_METHOD"]=="POST") {
 
@@ -20,11 +27,11 @@ if ($_SERVER["REQUEST_METHOD"]=="POST") {
         $categoryname_err = "Category cannot be more than 100 characters";
     }
     else {
-        $categoryname = control_input($input_categoryname);
+        $categoryname = $product->control_input($input_categoryname);
     }
 
     if(empty($categoryname_err)) {
-        if (createCategory($categoryname)) {
+        if ($product->createCategory($categoryname)) {
             $_SESSION['message'] = $categoryname." category added";
             $_SESSION['type'] = "success";
             
@@ -38,8 +45,8 @@ if ($_SERVER["REQUEST_METHOD"]=="POST") {
 
 ?>
 
-<?php include "views/_header.php" ?>
-<?php include "views/_navbar.php" ?>
+<?php include_once "views/_header.php" ?>
+<?php include_once "views/_navbar.php" ?>
 
 
 <div class="container">

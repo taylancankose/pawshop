@@ -1,23 +1,26 @@
 <?php
-require "libs/vars.php";
-require "libs/functions.php";
+include_once 'classes/db.class.php';
+include_once 'classes/product.class.php';
+?>
 
-if (!isAdmin()) {
-    header("Location: index.php");
-    exit;
-}
+<?php
+require_once "classes/vars.php";
+
+// if (!isAdmin()) {
+//     header("Location: index.php");
+//     exit;
+// }
 
 $title = $description = $image = "";
 $price = 0;
 $title_err = $description_err = $price_err = $err = $image_err = "";
+$product = new Products();
 
-$categories = getCategories();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $input_title = trim($_POST["title"]);
-
-    // error management
+     // error management
     if (empty($input_title)) {
         $title_err = "Title can not be empty";
     } else if (strlen($input_title) > 255) {
@@ -25,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else if (strlen($input_title) < 5) {
         $title_err = "Title can not be less than 5 characters";
     } else {
-        $title = control_input($input_title);
+        $title = $product->control_input($input_title);
     }
 
     $input_description = trim($_POST["description"]);
@@ -34,13 +37,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else if (strlen($input_description) < 15) {
         $description_err = "Description can not be less than 15 characters";
     } else {
-        $description = control_input($input_description);
+        $description = $product->control_input($input_description);
     }
 
     if (empty($_FILES["image"]["name"])) {
         $image_err = "Please select an image";
     } else {
-        $result = uploadImage($_FILES["image"]);
+        $result = $product->uploadImage($_FILES["image"]);
         if ($result["isSuccess"] == 0) {
             $image_err = $result["message"];
         } else {
@@ -60,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (empty($title_err) && empty($price_err) && empty($description_err)) {
-        if (createProduct($title,  $description,  $price, $image, $stock)) {
+        if ($product->createProduct($title,  $description,  $price, $image, $stock)) {
             if ($image) echo ($image);
             header('Location: index.php');
         } else {
@@ -71,8 +74,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 ?>
 
-<?php include "views/_header.php" ?>
-<?php include "views/_navbar.php" ?>
+<?php include_once "views/_header.php" ?>
+<?php include_once "views/_navbar.php" ?>
 
 <div class="container mt-4 justify-content-center align-items-center">
     <?php if (!empty($err)) : ?>
@@ -127,4 +130,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
 
-<?php include "views/_ckeditor.php" ?>
+<?php include_once "views/_ckeditor.php" ?>

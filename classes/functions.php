@@ -22,6 +22,7 @@ function getUser(string $email){
     return null;
 }
 
+ 
 function registerUser(string $username, string $email, string $password)
 {
     $db = connectDb();
@@ -47,7 +48,7 @@ function registerUser(string $username, string $email, string $password)
 
 function createProduct(string $title, string $description, int $price, string $image, int $stock = 1)
 {
-    include "dbsettings.php";
+    include_once "dbsettings.php";
 
     $query = "INSERT INTO products (title, description, price, image, stock) VALUES (?, ?, ?, ?, ?)";
     $result = mysqli_prepare($connection, $query);
@@ -61,7 +62,7 @@ function createProduct(string $title, string $description, int $price, string $i
 
 function getProducts()
 {
-    include "dbsettings.php";
+    include_once "dbsettings.php";
     $query = "SELECT * FROM products";
     $result = mysqli_query($connection, $query);
     mysqli_close($connection);
@@ -71,7 +72,7 @@ function getProducts()
 
 function getCategories()
 {
-    include "dbsettings.php";
+    include_once "dbsettings.php";
     $query = "SELECT * FROM categories";
     $result = mysqli_query($connection, $query);
     mysqli_close($connection);
@@ -80,7 +81,7 @@ function getCategories()
 }
 
 function clearProductCategories(int $product_id){
-    include "dbsettings.php";
+    include_once "dbsettings.php";
     $query = "DELETE FROM product_category WHERE product_id = $product_id";
     $result = mysqli_query($connection, $query);
     echo mysqli_error($connection);
@@ -90,7 +91,7 @@ function clearProductCategories(int $product_id){
 
 function getProductById(int $id)
 {
-    include "dbsettings.php";
+    include_once "dbsettings.php";
 
     $query = "SELECT * FROM products WHERE id='$id'";
     $result = mysqli_query($connection, $query);
@@ -102,7 +103,7 @@ function getProductById(int $id)
 
 function getCategoryById(int $id)
 {
-    include "dbsettings.php";
+    include_once "dbsettings.php";
 
     $query = "SELECT * FROM categories WHERE id=$id";
     $result = mysqli_query($connection, $query);
@@ -113,7 +114,7 @@ function getCategoryById(int $id)
 }
 
 function getCategoriesByProductId($id) {
-    include "dbsettings.php";
+    include_once "dbsettings.php";
 
     $query = "SELECT c.id, c.name 
               FROM product_category pc 
@@ -129,7 +130,7 @@ function getCategoriesByProductId($id) {
 
 
 function getProductsByCategoryId($id) {
-    include "dbsettings.php";
+    include_once "dbsettings.php";
 
     $query = "SELECT * FROM product_category pc INNER JOIN products p on pc.product_id=p.id WHERE pc.category_id=$id";
     $result = mysqli_query($connection, $query);
@@ -179,7 +180,7 @@ function uploadImage($file)
 
 function editProduct(int $id, string $title, string $description, int $price, string $image, int $stock = 1)
 {
-    include "dbsettings.php";
+    include_once "dbsettings.php";
 
     $title = mysqli_real_escape_string($connection, $title);
     $description = mysqli_real_escape_string($connection, $description);
@@ -193,7 +194,7 @@ function editProduct(int $id, string $title, string $description, int $price, st
 
 function editCategory(int $id, string $name, int $is_active)
 {
-    include "dbsettings.php";
+    include_once "dbsettings.php";
 
     $query = "UPDATE categories SET name='$name', is_active='$is_active' WHERE id=$id";
     $result = mysqli_query($connection, $query);
@@ -204,7 +205,7 @@ function editCategory(int $id, string $name, int $is_active)
 
 function deleteProduct(int $id)
 {
-    include "dbsettings.php";
+    include_once "dbsettings.php";
     $query = "DELETE FROM products WHERE id=$id";
     $result = mysqli_query($connection, $query);
     return $result;
@@ -212,7 +213,7 @@ function deleteProduct(int $id)
 
 function deleteCategory(int $id)
 {
-    include "dbsettings.php";
+    include_once "dbsettings.php";
     $query = "DELETE FROM categories WHERE id=$id";
     $result = mysqli_query($connection, $query);
     return $result;
@@ -220,7 +221,7 @@ function deleteCategory(int $id)
 
 function createCategory(string $name)
 {
-    include "dbsettings.php";
+    include_once "dbsettings.php";
 
     $check_category_query = "SELECT * FROM categories WHERE name= ?";
     $check_stmt = mysqli_prepare($connection, $check_category_query);
@@ -260,7 +261,7 @@ function createCategory(string $name)
 }
 
 function addProductToCategories(int $product_id, array $categories){
-    include 'dbsettings.php';
+    include_once 'dbsettings.php';
 
     $query = "";
     foreach($categories as $category){
@@ -298,5 +299,46 @@ function isAdmin(){
         return false;
     }
 }
+
+function getProductsByFilters($categoryId, $keyword, $page){
+    include_once "dbsettings.php";
+
+    $pageCount = 4;
+    $offset = ($page - 1) * $pageCount;
+    $query = "";
+
+    if(!empty($categoryId)){
+        $query = "from product_category pc inner join products p on pc.product_id = p.id WHERE pc.category_id = $categoryId AND p.stock = 1";
+    }else{
+        $query = "from products p where p.stock = 1";
+    }
+
+    if(!empty($keyword)){
+        $query .= " AND (p.title LIKE '%$keyword%' OR p.description LIKE '%$keyword%')";
+    }
+
+    $total_sql = "SELECT COUNT(*) ".$query;
+
+    $count_data = mysqli_query($connection, $total_sql);
+    if(!$count_data){
+        die("Query failed: " . mysqli_error($connection));
+    }
+    $count = mysqli_fetch_array($count_data)[0];
+    $total_pages = ceil($count / $pageCount);
+
+    echo $total_pages;
+
+    $sql = "SELECT * ".$query." LIMIT $offset, $pageCount";
+    $result = mysqli_query($connection, $sql);
+    if(!$result){
+        die("Query failed: " . mysqli_error($connection));
+    }
+    mysqli_close($connection);
+    return array(
+        "total_pages" => $total_pages,
+        "data" => $result
+    );
+}
+
 
 ?>
