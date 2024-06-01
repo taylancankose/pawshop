@@ -43,10 +43,19 @@ class Products extends Db
         }
     }
 
-    public function getUser($email){
+    public function getUser($email)
+    {
         $sql = "SELECT * FROM users WHERE email=:email";
         $stmt = $this->connect()->prepare($sql);
         $stmt->execute(['email' => $email]);
+        return $stmt->fetch();
+    }
+
+    public function getUserByUsername($username)
+    {
+        $sql = "SELECT * FROM users WHERE username=:username";
+        $stmt = $this->connect()->prepare($sql);
+        $stmt->execute(['username' => $username]);
         return $stmt->fetch();
     }
 
@@ -206,6 +215,92 @@ class Products extends Db
             'name' => $name,
             'is_active' => $is_active,
         ]);
+    }
+
+    public function addToCart($user_id, $product_id, $qty)
+    {
+        $data = "SELECT * FROM shopping_cart WHERE user_id = :user_id AND product_id = :product_id";
+        $stmt = $this->connect()->prepare($data);
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->bindParam(':product_id', $product_id);
+        $stmt->execute();
+        $existingProduct = $stmt->fetch();
+        if ($existingProduct) {
+            // Product already exists, update quantity
+            $newQty = $existingProduct->qty + $qty;
+            $updateSql = "UPDATE shopping_cart SET qty = :new_qty WHERE id = :id";
+            $updateStmt = $this->connect()->prepare($updateSql);
+            $updateStmt->bindParam(':new_qty', $newQty);
+            $updateStmt->bindParam(':id', $existingProduct->id);
+            $updateResult = $updateStmt->execute();
+
+            if ($updateResult) {
+                // Quantity updated successfully
+                return true;
+            } else {
+                // Failed to update quantity
+                return false;
+            }
+        } else {
+            $sql = "INSERT INTO shopping_cart (user_id, product_id, qty) VALUES (:user_id, :product_id, :qty)";
+            $stmt = $this->connect()->prepare($sql);
+            $result = $stmt->execute([
+                'user_id' => $user_id,
+                'product_id' => $product_id,
+                'qty' => $qty,
+            ]);
+        }
+        return $result;
+    }
+
+    public function decreaseFromCart($user_id, $product_id){
+        $data = "SELECT * FROM shopping_cart WHERE user_id = :user_id AND product_id = :product_id";
+        $stmt = $this->connect()->prepare($data);
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->bindParam(':product_id', $product_id);
+        $stmt->execute();
+        $existingProduct = $stmt->fetch();
+
+        if ($existingProduct) {
+          // Product exists, decrement quantity
+          $newQty = $existingProduct->qty - 1;
+      
+          if ($newQty > 0) {
+            // Update quantity if not zero
+            $updateSql = "UPDATE shopping_cart SET qty = :new_qty WHERE id = :id";
+            $updateStmt = $this->connect()->prepare($updateSql);
+            $updateStmt->bindParam(':new_qty', $newQty);
+            $updateStmt->bindParam(':id', $existingProduct->id);
+            $updateResult = $updateStmt->execute();
+      
+            if ($updateResult) {
+              return true;
+            } else {
+              return false;
+            }
+          } else {
+            // Remove product from cart if quantity reaches zero
+            $deleteSql = "DELETE FROM shopping_cart WHERE id = :id";
+            $deleteStmt = $this->connect()->prepare($deleteSql);
+            $deleteStmt->bindParam(':id', $existingProduct->id);
+            $deleteResult = $deleteStmt->execute();
+      
+            if ($deleteResult) {
+              return true;
+            } else {
+              return false;
+            }
+          }
+        } else {
+          return false;
+        }
+    }
+
+    public function getCart($user_id){
+        $sql = "SELECT * FROM shopping_cart WHERE user_id=:user_id ";
+        $stmt = $this->connect()->prepare($sql);
+        $stmt->execute(["user_id" => $user_id]);
+        return $stmt->fetchAll();
     }
 
     public function deleteProduct($id)
