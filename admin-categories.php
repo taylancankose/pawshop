@@ -4,13 +4,13 @@
 
     require_once "classes/vars.php";
 
-    
-    // if(!isAdmin()){
-    //     header("Location: index.php");
-    //     exit;
-    // }
-
     $product = new Products();
+
+    $is_admin = $product->isAdmin();
+
+if(!$is_admin){
+    header("Location: index.php");
+}
 
 ?>
 

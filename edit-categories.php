@@ -8,6 +8,12 @@ require_once "classes/vars.php";
 
 $product = new Products();
 
+$is_admin = $product->isAdmin();
+
+if(!$is_admin){
+    header("Location: index.php");
+}
+
 $id = $_GET["id"];
 $result = $product->getCategoryById($id);
  

@@ -7,7 +7,7 @@ include_once 'classes/product.class.php';
 include_once 'classes/product.class.php';
 
 $product = new Products();
-$username = $_SESSION["username"];
+$username = isset($_SESSION["username"]) ? $_SESSION["username"] : "";
 $user = $product->getUserByUsername($username);
 $categoryId = "";
 $keyword = "";
@@ -95,7 +95,7 @@ if (!empty($_GET['cats'])) {
                                 </a>
                             </h4>
                             <h4>$<?php echo $item->price ?></h4>
-                            <?php if($_SESSION["user_type"] == "user") :?>
+                            <?php if(isset($_SESSION["user_type"]) && $_SESSION["user_type"] == "user") :?>
                                 <form method="POST">
                                 <input type="hidden" name="product_id" value="<?php echo $item->id ?>">
                                 <button type="submit" name="add_to_cart" class="btn btn-lg btn-outline-secondary my-2">Add to Cart</button>
@@ -118,7 +118,7 @@ if (!empty($_GET['cats'])) {
                                 </a>
                             </h4>
                             <h4>$<?php echo $item->price ?></h4>
-                            <?php if($_SESSION["user_type"] == "user") :?>
+                            <?php if(isset($_SESSION["user_type"]) && $_SESSION["user_type"] == "user") :?>
                                 <form method="POST">
                                 <input type="hidden" name="product_id" value="<?php echo $item->id ?>">
                                 <button type="submit" name="add_to_cart" class="btn btn-lg btn-outline-secondary my-2">Add to Cart</button>

@@ -76,34 +76,6 @@ class Products extends Db
         return $stmt->fetch();
     }
 
-    public function getCategories()
-    {
-        $sql = "SELECT * FROM categories";
-        $stmt = $this->connect()->prepare($sql);
-        $stmt->execute();
-
-        return $stmt->fetchAll();
-    }
-
-    public function getCategoryById(int $id)
-    {
-        $sql = "SELECT * FROM categories WHERE id=:id";
-        $stmt = $this->connect()->prepare($sql);
-        $stmt->execute(['id' => $id]);
-        return $stmt->fetch();
-    }
-
-    public function getCategoriesByProductId($id)
-    {
-        $sql = "SELECT c.id, c.name 
-            FROM product_category pc 
-            INNER JOIN categories c ON pc.category_id = c.id 
-            WHERE pc.product_id = ?";
-        $stmt = $this->connect()->prepare($sql);
-        $stmt->execute([$id]);
-        return $stmt->fetchAll();
-    }
-
     public function getProductsByCategoryId($id)
     {
         $sql = "SELECT * FROM product_category pc INNER JOIN products p on pc.product_id=p.id WHERE pc.category_id=:id";
@@ -164,6 +136,29 @@ class Products extends Db
         ]);
     }
 
+    public function editProduct($id, $title, $description, $price, $image, $stock = 1)
+    {
+        $sql = "UPDATE products SET title=:title, description=:description, price=:price, image=:image, stock=:stock WHERE id=:id";
+        $stmt = $this->connect()->prepare($sql);
+        return $stmt->execute([
+            'id' => $id,
+            'title' => $title,
+            'description' => $description,
+            'price' => $price,
+            'image' => $image,
+            'stock' => $stock
+        ]);
+    }
+    
+    public function deleteProduct($id)
+    {
+        $sql = "DELETE FROM products WHERE id=:id";
+        $stmt = $this->connect()->prepare($sql);
+        return $stmt->execute([
+            'id' => $id,
+        ]);
+    }
+
     public function createCategory($name)
     {
         $check_category_query = "SELECT * FROM categories WHERE name = ?";
@@ -192,20 +187,6 @@ class Products extends Db
         return true;
     }
 
-    public function editProduct($id, $title, $description, $price, $image, $stock = 1)
-    {
-        $sql = "UPDATE products SET title=:title, description=:description, price=:price, image=:image, stock=:stock WHERE id=:id";
-        $stmt = $this->connect()->prepare($sql);
-        return $stmt->execute([
-            'id' => $id,
-            'title' => $title,
-            'description' => $description,
-            'price' => $price,
-            'image' => $image,
-            'stock' => $stock
-        ]);
-    }
-
     public function editCategory($id, $name, $is_active)
     {
         $sql = "UPDATE categories SET name=:name, is_active=:is_active WHERE id=:id";
@@ -215,6 +196,52 @@ class Products extends Db
             'name' => $name,
             'is_active' => $is_active,
         ]);
+    }
+
+    public function deleteCategory($id)
+    {
+        $sql = "DELETE FROM categories WHERE id=:id";
+        $stmt = $this->connect()->prepare($sql);
+        return $stmt->execute([
+            'id' => $id,
+        ]);
+    }
+
+    public function clearProductCategories($product_id)
+    {
+        $sql = "DELETE FROM product_category WHERE product_id=:product_id";
+        $stmt = $this->connect()->prepare($sql);
+        return $stmt->execute([
+            'product_id' => $product_id,
+        ]);
+    }
+
+    public function getCategories()
+    {
+        $sql = "SELECT * FROM categories";
+        $stmt = $this->connect()->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    public function getCategoryById(int $id)
+    {
+        $sql = "SELECT * FROM categories WHERE id=:id";
+        $stmt = $this->connect()->prepare($sql);
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch();
+    }
+
+    public function getCategoriesByProductId($id)
+    {
+        $sql = "SELECT c.id, c.name 
+            FROM product_category pc 
+            INNER JOIN categories c ON pc.category_id = c.id 
+            WHERE pc.product_id = ?";
+        $stmt = $this->connect()->prepare($sql);
+        $stmt->execute([$id]);
+        return $stmt->fetchAll();
     }
 
     public function addToCart($user_id, $product_id, $qty)
@@ -303,30 +330,70 @@ class Products extends Db
         return $stmt->fetchAll();
     }
 
-    public function deleteProduct($id)
-    {
-        $sql = "DELETE FROM products WHERE id=:id";
+    public function createAddress($first_name, $last_name, $email, $address, $country, $state, $zip, $user_id){
+        $sql = "INSERT INTO addresses (first_name, last_name, email, address, country, state, zip, user_id) VALUES (:first_name, :last_name, :email, :address, :country, :state, :zip, :user_id)";
         $stmt = $this->connect()->prepare($sql);
+
         return $stmt->execute([
-            'id' => $id,
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'email' => $email,
+            'address' => $address,
+            'country' => $country,
+            'state' => $state,
+            'zip' => $zip,
+            'user_id' => $user_id,
         ]);
     }
 
-    public function deleteCategory($id)
-    {
-        $sql = "DELETE FROM categories WHERE id=:id";
+    public function getAddressesByUser($user_id){
+        $sql = "SELECT * FROM addresses WHERE user_id=:user_id";
         $stmt = $this->connect()->prepare($sql);
+        $stmt->execute(["user_id" => $user_id]);
+
+        return $stmt->fetchAll();
+    }
+
+    public function createOrder($user_id, $address_id, $total_price, $order_number){
+        $sql = "INSERT INTO orders (user_id, address_id, total_price, order_number) VALUES (:user_id, :address_id, :total_price, :order_number)";
+        $stmt = $this->connect()->prepare($sql);
+
         return $stmt->execute([
-            'id' => $id,
+            "user_id" => $user_id,
+            "address_id" => $address_id,
+            "total_price" => $total_price,
+            "order_number" => $order_number
         ]);
     }
 
-    public function clearProductCategories($product_id)
-    {
-        $sql = "DELETE FROM product_category WHERE product_id=:product_id";
+    public function getOrdersByOrderNumber($order_number){
+        $sql = "SELECT * FROM orders WHERE order_number=:order_number";
         $stmt = $this->connect()->prepare($sql);
+        $stmt->execute([
+            "order_number" => $order_number,
+        ]);
+        return $stmt->fetch();
+    }
+
+
+    public function addProductToOrder($order_id, $product_id, $qty)
+    {
+        $sql = "INSERT INTO order_products (order_id, product_id, qty) VALUES (:order_id, :product_id, :qty)";
+        $stmt = $this->connect()->prepare($sql);
+    
         return $stmt->execute([
+            'order_id' => $order_id,
             'product_id' => $product_id,
+            'qty' => $qty,
+        ]);
+    }
+    
+
+    public function clearCart($user_id) {
+        $sql = "DELETE FROM shopping_cart WHERE user_id=:user_id";
+        $stmt = $this->connect()->prepare($sql);
+        $stmt->execute([
+            "user_id" => $user_id
         ]);
     }
 

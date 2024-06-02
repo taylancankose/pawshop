@@ -7,14 +7,17 @@ include_once 'classes/product.class.php';
 <?php
 require_once "classes/vars.php";
 
-// if(!isAdmin()){
-//     header("Location: index.php");
-//     exit;
-// }
+$product = new Products();
+$is_admin = $product->isAdmin();
+
+if(!$is_admin){
+    header("Location: index.php");
+}
+
 
 $categoryname = "";
 $categoryname_err = "";
-$product = new Products();
+
 
 
 if ($_SERVER["REQUEST_METHOD"]=="POST") {

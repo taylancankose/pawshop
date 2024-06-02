@@ -8,10 +8,11 @@ include_once 'classes/product.class.php';
 session_start(); // Start the session
 $product = new Products();
 
-// if(isLoggedin()){
-//     header("location: index.php");
-//     exit;
-// }
+$is_loggedIn = $product->isLoggedIn();
+
+if($is_loggedIn){
+    header("Location: index.php");
+}
 
 $email = $password = "";
 $email_err = $password_err = $login_err = "";

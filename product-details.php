@@ -7,16 +7,19 @@ include_once 'classes/product.class.php';
 <?php
 require_once "classes/vars.php";
 
+$product = new Products();
+
 if (!isset($_GET["id"]) or !is_numeric($_GET["id"])) {
     header("Location: index.php");
 }
 
-$result = getProductById($_GET["id"]);
-$item = mysqli_fetch_assoc($result);
+$result = $product->getProductById($_GET["id"]);
 
 if (!$result) {
     header("Location: index.php");
 }
+
+
 
 ?>
 
@@ -25,15 +28,14 @@ if (!$result) {
 <?php include_once "views/_navbar.php" ?>
 
 <body>
-    
     <!-- Product section-->
     <section class="py-5">
         <div class="container mt-3">
             <div class="container px-4">
                 <div class="row gx-4 gx-lg-5">
-                    <div class="col-md-6"><img class="card-img-top mb-md-0" src="uploads/<?php echo $item["image"] ? $item["image"] : "https://dummyimage.com/600x700/dee2e6/6c757d.jpg" ?>" alt="<?php echo $item["title"] ?>" /></div>
+                    <div class="col-md-6"><img class="card-img-top mb-md-0" src="uploads/<?php echo $result->image ? $result->image : "https://dummyimage.com/600x700/dee2e6/6c757d.jpg" ?>" alt="<?php echo $result->title ?>" /></div>
                     <div class="col-md-6">
-                        <h1 class="display-5 fw-bolder"><?php echo $item["title"] ?></h1>
+                        <h1 class="display-5 fw-bolder"><?php echo $result->title ?></h1>
                         <div class="">
                             <h3>$40.00</h3>
                             <button class="btn btn-outline-dark" type="button">
@@ -41,9 +43,8 @@ if (!$result) {
                             </button>
                         </div>
                         <p class="lead">
-                            <?php echo html_entity_decode($item["description"]) ?>
+                            <?php echo html_entity_decode($result->description) ?>
                         </p>
-
                     </div>
                 </div>
             </div>

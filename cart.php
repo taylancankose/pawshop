@@ -1,6 +1,66 @@
 <?php include_once "views/_header.php" ?>
 <?php include_once "views/_navbar.php" ?>
 
+<?php
+include_once 'classes/db.class.php';
+include_once 'classes/product.class.php';
+?>
+
+<?php
+
+$product = new Products();
+
+$is_loggedIn = $product->isLoggedIn();
+
+if (!$is_loggedIn) {
+    header("Location: index.php");
+}
+
+$user = $product->getUserByUsername($_SESSION['username']);
+$addresses = $product->getAddressesByUser($user->id);
+$cart = $product->getCart($user->id);
+$total = 0;
+$shipping_price = 0;
+$final = 0;
+
+foreach ($cart as $c){
+    $item = $product->getProductById($c->product_id);
+    $total += $item->price * $c->qty;
+    $shipping_price = $total * 0.1 ;
+    $final = $total + $shipping_price;
+}
+
+$selected_address = null;
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["address"])) {
+    $selected_address = $_POST["address"];
+
+    $today = date("Ymd");
+    $rand = strtoupper(substr(uniqid(sha1(time())), 0, 4));
+    $order_number = $today . $rand;
+
+
+    if ($final > 0 && isset($selected_address) && isset($_POST["cc_name"]) && isset($_POST["cc_number"]) && isset($_POST["cc_expiration"]) && isset($_POST["cc_cvv"])) {
+
+        $product->createOrder($user->id, $selected_address, $final, $order_number);
+        $order_id = $product->getOrdersByOrderNumber($order_number)->order_id;
+
+        if ($order_id) {
+            // Add products to the order_products table
+            foreach ($cart as $c) {
+                $product->addProductToOrder($order_id, $c->product_id, $c->qty);
+            }
+            // Clear the cart
+            $product->clearCart($user->id);
+            header("Location: order-success.php?success=$order_number");
+            exit;
+        } else {
+            echo "Order creation failed.";
+        }
+    }
+}
+
+
+?>
 
 <div class="container mb-5">
     <div class="py-5">
@@ -14,81 +74,70 @@
                 <span class="badge badge-secondary badge-pill">3</span>
             </h4>
             <ul class="list-group mb-3">
-                <li class="list-group-item d-flex justify-content-between lh-condensed">
-                    <div>
-                        <h6 class="my-0">Product name</h6>
-                        <small class="text-muted">Brief description</small>
-                    </div>
-                    <span class="text-muted">$12</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between lh-condensed">
-                    <div>
-                        <h6 class="my-0">Second product</h6>
-                        <small class="text-muted">Brief description</small>
-                    </div>
-                    <span class="text-muted">$8</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between lh-condensed">
-                    <div>
-                        <h6 class="my-0">Third item</h6>
-                        <small class="text-muted">Brief description</small>
-                    </div>
-                    <span class="text-muted">$5</span>
-                </li>
+                <?php foreach ($cart as $c) : ?>
+                    <?php $item = $product->getProductById($c->product_id)?>
+                    <li class="list-group-item d-flex justify-content-between lh-condensed">
+                        <div>
+                            <h6 class="my-0"><?php echo $item->title ?></h6>
+                            <small class="text-muted"><?php echo substr($item->description, 0, 46) . "..." ?></small>
+                        </div>
+                        <span class="text-muted">$<?php echo $item->price . " (x$c->qty)" ?></span>
+                    </li>
+                <?php endforeach; ?>
                 <li class="list-group-item d-flex justify-content-between bg-light">
                     <div class="text-danger">
                         <h6 class="my-0">Shipping</h6>
                         <small><i>DHL</i></small>
                     </div>
-                    <span class="text-danger">$15</span>
+                    <span class="text-danger">$<?php echo $shipping_price ?></span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                     <span>Total (USD)</span>
-                    <strong>$20</strong>
+                    <strong>$<?php echo $final ?> </strong>
                 </li>
             </ul>
 
-            <form class="card p-2">
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Promo code">
-                    <div class="input-group-append">
-                        <button type="submit" class="btn btn-secondary">Redeem</button>
-                    </div>
-                </div>
-            </form>
         </div>
         <div class="col-md-8 order-md-1">
-            <form class="needs-validation" novalidate="">
+            <form class="needs-validation" novalidate="" method="POST">
+                <div class="d-flex ">
+                    <div class="card w-25 me-4">
+                        <h5 class="card-header">Add New Address</h5>
+                        <div class="card-body d-flex justify-content-center align-items-center text-center">
+                            <a href="address-form.php" class="text-dark" style="text-decoration: none; ">
+                                <h5 class="card-title">+</h5>
+                                <p class="card-text">Add New Address</p>
+                            </a>
+                        </div>
+                    </div>
+                    <?php foreach ($addresses as $address) : ?>
+                        <div class="card w-25 me-4">
+                            <h5 class="card-header"><?php echo $address->first_name . " " . $address->last_name ?></h5>
+                            <div class="card-body">
+                                <h5 class="card-title"></h5>
+                                <p class="card-text"><?php echo $address->address ?></p>
+                                <input type="radio" name="address" value="<?php echo $address->id; ?>" <?php if ($selected_address == $address->id) echo "checked"; ?> required>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
                 <hr class="mb-4">
 
                 <h4 class="mb-3">Payment</h4>
 
-                <div class="d-block my-3">
-                    <div class="custom-control custom-radio">
-                        <input id="credit" name="paymentMethod" type="radio" class="custom-control-input" checked="" required="">
-                        <label class="custom-control-label" for="credit">Credit card</label>
-                    </div>
-                    <div class="custom-control custom-radio">
-                        <input id="debit" name="paymentMethod" type="radio" class="custom-control-input" required="">
-                        <label class="custom-control-label" for="debit">Debit card</label>
-                    </div>
-                    <div class="custom-control custom-radio">
-                        <input id="paypal" name="paymentMethod" type="radio" class="custom-control-input" required="">
-                        <label class="custom-control-label" for="paypal">PayPal</label>
-                    </div>
-                </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="cc-name">Name on card</label>
-                        <input type="text" class="form-control" id="cc-name" placeholder="" required="">
+                        <input type="text" class="form-control" id="cc_name" name="cc_name" placeholder="" required="">
                         <small class="text-muted">Full name as displayed on card</small>
                         <div class="invalid-feedback">
                             Name on card is required
                         </div>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="cc-number">Credit card number</label>
-                        <input type="text" class="form-control" id="cc-number" placeholder="" required="">
+                        <label for="cc_number">Credit card number</label>
+                        <input type="text" class="form-control" id="cc_number" name="cc_number" placeholder="" required="">
                         <div class="invalid-feedback">
                             Credit card number is required
                         </div>
@@ -96,21 +145,20 @@
                 </div>
                 <div class="row">
                     <div class="col-md-3 mb-3">
-                        <label for="cc-expiration">Expiration</label>
-                        <input type="text" class="form-control" id="cc-expiration" placeholder="" required="">
+                        <label for="cc_expiration">Expiration</label>
+                        <input type="text" class="form-control" id="cc_expiration" name="cc_expiration" placeholder="" required="">
                         <div class="invalid-feedback">
                             Expiration date required
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <label for="cc-cvv">CVV</label>
-                        <input type="text" class="form-control" id="cc-cvv" placeholder="" required="">
+                        <label for="cc_cvv">CVV</label>
+                        <input type="text" class="form-control" id="cc_cvv" name="cc_cvv" placeholder="" required="">
                         <div class="invalid-feedback">
                             Security code required
                         </div>
                     </div>
                 </div>
-                <hr class="mb-4">
                 <button class="btn btn-primary btn-lg btn-block" type="submit">Continue to checkout</button>
             </form>
         </div>

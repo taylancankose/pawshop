@@ -16,6 +16,11 @@ $price = 0;
 $title_err = $description_err = $price_err = $err = $image_err = "";
 $product = new Products();
 
+$is_admin = $product->isAdmin();
+
+if(!$is_admin){
+    header("Location: index.php");
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 

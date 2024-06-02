@@ -2,7 +2,8 @@
 require_once "classes/vars.php";
 require_once "classes/product.class.php";
 
-$product = new Products()
+$product = new Products();
+
 ?>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -20,9 +21,6 @@ $product = new Products()
                 </li>
                 <li class="nav-item">
                     <a href="shop.php" class="nav-link">Shop</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">About Us</a>
                 </li>
             </ul>
             <ul class="navbar-nav mb-2 mb-lg-0">
@@ -51,7 +49,7 @@ $product = new Products()
                         </li>";
                     } else {
                         echo "<li class='nav-item'>
-                        <a href='#' class='nav-link'>
+                        <a href='cart.php' class='nav-link'>
                           <i class='fa fa-shopping-cart '></i>
                         </a>
                       </li>";

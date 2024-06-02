@@ -6,16 +6,18 @@ include_once 'classes/product.class.php';
 
 <?php 
 require_once "classes/vars.php";
- 
-// if(isLoggedin()){
-//     header("location: index.php");
-//     exit;
-// }
+
+$product = new Products();
+
+$is_loggedIn = $product->isLoggedIn();
+
+if($is_loggedIn){
+    header("Location: index.php");
+}
 
 require_once "classes/vars.php";
 require_once "classes/product.class.php";
 
-$product = new Products();
 
 $username = $email = $password = $confirm_password = "";
 $username_err = $email_err = $password_err = $confirm_password_err = "";
