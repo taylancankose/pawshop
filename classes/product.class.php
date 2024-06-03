@@ -346,6 +346,13 @@ class Products extends Db
         ]);
     }
 
+    public function getAddressById($address_id){
+        $sql = "SELECT * FROM addresses WHERE id=:address_id";
+        $stmt = $this->connect()->prepare($sql);
+        $stmt->execute(["address_id" => $address_id]);
+        return $stmt->fetch();
+    }
+
     public function getAddressesByUser($user_id){
         $sql = "SELECT * FROM addresses WHERE user_id=:user_id";
         $stmt = $this->connect()->prepare($sql);
@@ -395,6 +402,38 @@ class Products extends Db
         $stmt->execute([
             "user_id" => $user_id
         ]);
+    }
+
+    public function getOrders($user_id){
+        $sql = "SELECT 
+            orders.order_id, 
+            orders.order_number, 
+            orders.total_price, 
+            orders.order_date, 
+            orders.status,
+            orders.order_date,
+            orders.address_id,
+            users.id as user_id, 
+            users.username, 
+            products.id as product_id,
+            products.title,
+            products.price,
+            order_products.qty
+        FROM 
+            orders
+        JOIN 
+            users ON orders.user_id = users.id
+        JOIN 
+            order_products ON orders.order_id = order_products.order_id
+        JOIN 
+            products ON order_products.product_id = products.id
+        WHERE 
+            user_id=:user_id";
+
+        $stmt = $this->connect()->prepare($sql);
+        $stmt->execute(["user_id" => $user_id]);
+
+        return $stmt->fetchAll();
     }
 
     public function isLoggedIn()

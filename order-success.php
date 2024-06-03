@@ -4,8 +4,21 @@ include_once 'classes/product.class.php';
 ?>
 
 <?php
+session_start();
 
 $order_number = $_GET["success"];
+$product = new Products();
+
+$is_loggedIn = $product->isLoggedIn();
+
+if(!$is_loggedIn){
+    header("Location: index.php");
+}
+
+
+$user = $product->getUserByUsername($_SESSION["username"]);
+$orders = $product->getOrders($user->id);
+print_r($orders);
 
 ?>
 

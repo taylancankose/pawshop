@@ -4,6 +4,12 @@ require_once "classes/product.class.php";
 
 $product = new Products();
 
+if(isset($_SESSION["username"])){
+    $user = $product->getUserByUsername($_SESSION["username"]) ;
+    $orders = $product->getOrders($user->id);
+}
+
+
 ?>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -22,6 +28,11 @@ $product = new Products();
                 <li class="nav-item">
                     <a href="shop.php" class="nav-link">Shop</a>
                 </li>
+                <?php if(!empty($orders)) : ?>
+                    <li class="nav-item">
+                    <a href="orders.php" class="nav-link">Orders</a>
+                </li>
+                <?php endif; ?>
             </ul>
             <ul class="navbar-nav mb-2 mb-lg-0">
                 <?php if (isset($_SESSION["loggedIn"])) : ?>

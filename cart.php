@@ -54,9 +54,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["address"])) {
             header("Location: order-success.php?success=$order_number");
             exit;
         } else {
-            echo "Order creation failed.";
+            echo "<div class='alert alert-danger'>Order creation failed.</div>";
         }
     }
+}else{
+    echo "<div class='alert alert-danger text-center h6'>Order creation failed.</div>";
 }
 
 
