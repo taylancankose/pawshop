@@ -24,7 +24,7 @@ if (!empty($_GET['cats'])) {
     $categoryId = $_GET['cats'];
     $filtered_products = $product->getProductsByCategoryId($categoryId);
 } else {
-    $productsData = $product->getProductsByFilters($categoryId, $keyword, $page);
+    $productsData = $product->getProductsByFilters($categoryId, $page);
     $total_pages = $productsData['total_pages'];
     $result = $productsData['data'];
 }

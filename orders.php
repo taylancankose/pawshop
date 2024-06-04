@@ -8,14 +8,18 @@ session_start();
 
 $product = new Products();
 $user = $product->getUserByUsername($_SESSION["username"]);
-$orders = $product->getOrders($user->id);
+$page = 1;
 
 $is_loggedIn = $product->isLoggedIn();
+if (isset($_GET["page"]) && is_numeric($_GET["page"])) $page = $_GET["page"];
 
 if (!$is_loggedIn) {
     header("Location: index.php");
 }
 
+$orders = $product->getOrdersByFilters($user->id, $page);
+$total_pages = $orders['total_pages'];
+$result = $orders['data'];
 ?>
 
 <?php include_once "views/_header.php" ?>
@@ -281,7 +285,7 @@ if (!$is_loggedIn) {
     }
 </style>
 
-<div class="container-xl">
+<div class="container">
     <div class="table-responsive">
         <div class="table-wrapper">
             <div class="table-title">
@@ -302,7 +306,7 @@ if (!$is_loggedIn) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($orders as $order) : ?>
+                    <?php foreach ($result as $order) : ?>
                         <?php $address = $product->getAddressById($order->address_id) ?>
                         <tr>
                             <td class="w-50"><?php echo $order->title ?></td>
@@ -314,14 +318,28 @@ if (!$is_loggedIn) {
                     <?php endforeach; ?>
                 </tbody>
             </table>
-            <div class="clearfix">
-                <div class="hint-text">Showing <b>5</b> out of <b>25</b> entries</div>
-                <ul class="pagination">
-                    <li class="page-item disabled"><a href="#">Previous</a></li>
-                    <li class="page-item"><a href="#" class="page-link">1</a></li>
-                    <li class="page-item"><a href="#" class="page-link">Next</a></li>
-                </ul>
-            </div>
+            <?php if ($total_pages > 1) : ?>
+                <nav class="container justify-content-center d-flex">
+                    <ul class="pagination">
+                        <?php for ($x = 1; $x <= $total_pages; $x++) : ?>
+                            <li class="page-item <?php if ($x == $page) echo "active" ?>"><a class="page-link" href="
+                        <?php
+                            $url = "?page=" . $x;
+
+                            if (!empty($categoryId)) {
+                                $url .= "&categoryid=" . $categoryId;
+                            }
+
+                            if (!empty($keyword)) {
+                                $url .= "&q=" . $keyword;
+                            }
+                            echo $url;
+                        ?>
+                    "><?php echo $x; ?></a></li>
+                        <?php endfor; ?>
+                    </ul>
+                </nav>
+            <?php endif; ?>
         </div>
 
     </div>

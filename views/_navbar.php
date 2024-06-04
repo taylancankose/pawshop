@@ -56,6 +56,8 @@ if(isset($_SESSION["username"])){
                             <div class='dropdown-divider'></div>
                             <a class='dropdown-item ' href='add-category.php'>Add Category</a>
                             <a class='dropdown-item ' href='admin-categories.php'>Manage Categories</a>
+                            <div class='dropdown-divider'></div>
+                            <a class='dropdown-item ' href='admin-orders.php'>Manage Orders</a>
                           </div>
                         </li>";
                     } else {
