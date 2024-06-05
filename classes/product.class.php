@@ -1,7 +1,15 @@
 <?php
 include_once 'classes/db.class.php';
 ?>
+<?php
+// Import PHPMailer classes into the global namespace
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
 
+// Load Composer's autoloader
+require 'vendor/autoload.php';
+?>
 <?php
 
 class Products extends Db
@@ -21,6 +29,15 @@ class Products extends Db
 
     public function registerUser(string $username, string $email, string $password)
     {
+        $sql_check = "SELECT COUNT(*) FROM users WHERE email = :email";
+        $stmt_check = $this->connect()->prepare($sql_check);
+        $stmt_check->execute(['email' => $email]);
+        $email_exists = $stmt_check->fetchColumn();
+
+        if ($email_exists > 0) {
+            exit();
+        }
+
         $sql = "INSERT INTO users (username, email, password) VALUES (:username, :email, :password)";
 
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
@@ -89,40 +106,40 @@ class Products extends Db
         $offset = ($page - 1) * $pageCount;
         $query = "";
         $params = array();
-    
+
         if (!empty($categoryId)) {
             $query = "FROM product_category pc INNER JOIN products p ON pc.product_id = p.id WHERE pc.category_id = ? AND p.stock = 1";
             $params[] = $categoryId;
         } else {
             $query = "FROM products p WHERE p.stock = 1";
         }
-    
+
         // Get total count of records
         $total_sql = "SELECT COUNT(*) " . $query;
         $total_stmt = $this->connect()->prepare($total_sql);
         $total_stmt->execute($params);
         $count = $total_stmt->fetchColumn();
         $total_pages = ceil($count / $pageCount);
-    
+
         // Get paginated records
         $sql = "SELECT * " . $query . " LIMIT :offset, :pageCount";
         $stmt = $this->connect()->prepare($sql);
-    
+
         // Bind parameters as integers
         $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
         $stmt->bindValue(':pageCount', (int) $pageCount, PDO::PARAM_INT);
         if (!empty($categoryId)) {
             $stmt->bindValue(1, $categoryId, PDO::PARAM_INT);
         }
-        
+
         $stmt->execute();
-    
+
         return array(
             "total_pages" => $total_pages,
             "data" => $stmt->fetchAll(PDO::FETCH_OBJ)
         );
     }
-    
+
 
     public function createProduct($title, $description, $price, $image, $stock = 1)
     {
@@ -573,9 +590,9 @@ class Products extends Db
 
         // Duruma göre filtreleme
         if (!empty($status)) {
-           if($status != "any"){
-            $query .= " AND o.status = :status";
-           }
+            if ($status != "any") {
+                $query .= " AND o.status = :status";
+            }
         }
 
         // Sayfalama için limit ve offset ekle
@@ -607,24 +624,25 @@ class Products extends Db
         ];
     }
 
-    public function getOrderProductsByOrderId($order_id) {
+    public function getOrderProductsByOrderId($order_id)
+    {
         // Sorguyu hazırla
         $query = "SELECT p.*
                   FROM order_products op
                   JOIN products p ON op.product_id = p.id
                   WHERE op.order_id = :order_id";
-    
+
         $stmt = $this->connect()->prepare($query);
-    
+
         // Order ID parametresini bağla
         $stmt->bindParam(':order_id', $order_id, PDO::PARAM_INT);
-    
+
         // Sorguyu çalıştır
         $stmt->execute();
-    
+
         // Sonuçları al
         $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
         // Sonuçları döndür
         return $products;
     }
@@ -704,5 +722,184 @@ class Products extends Db
             "message" => $message,
             "image" => $new_file_name
         );
+    }
+
+    public function sendOTP($email, $username, $otp)
+    {
+        $mail = new PHPMailer(true);
+        $env = parse_ini_file('.env');
+
+        $mailHost = $env["MAIL_HOST"];
+        $mailPassword = $env["MAIL_PASSWORD"];
+        $mailUsername = $env["MAIL_USERNAME"];
+        $mailPort = $env["MAIL_PORT"];
+
+        try {
+            // Server settings
+            $mail->SMTPDebug = 0;            // Debug mod kapalı redirect için kapatmak lazım
+            $mail->isSMTP();                                  // SMTP Kullanarak Gönder
+            $mail->Host       = $mailHost;             // SMTP Host
+            $mail->SMTPAuth   = true;                         // SMTP Doğrulaması
+            $mail->Username   = $mailUsername;  // SMTP Kullanıcı Adı
+            $mail->Password   = $mailPassword;          // SMTP Şifre
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // SSL/TLS Ayarı
+            $mail->Port       = $mailPort;                          // PORT Ayarı
+            $mail->CharSet    = 'UTF-8';                      // Karakter seti
+            $mail->setLanguage('tr', '/optional/path/to/language/directory/'); // Dil Ayarı
+
+            // Recipients
+            $mail->setFrom($mailUsername, 'Pawshop');
+            $mail->addAddress($email, $username); // Alıcı E-Posta - İsim
+            $mail->addReplyTo($mailUsername, 'Pawshop'); // Alıcı cevapla dediğinde mailin gideceği adres
+
+
+            // Content
+            $mail->isHTML(true); // E-Posta HTML
+            $mail->Subject = 'Welcome to the Pawshop';
+            $mail->Body    = '  <body
+        style="
+          margin: 0;
+          background: #ffffff;
+          font-size: 14px;
+        "
+      >
+        <div
+          style="
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 45px 30px 60px;
+            background: #f4f7ff;
+            background-repeat: no-repeat;
+            background-size: 800px 452px;
+            background-position: top center;
+            font-size: 14px;
+            color: #434343;
+          "
+        >
+          <main>
+            <div
+              style="
+                margin: 0;
+                margin-top: 70px;
+                padding: 92px 30px 115px;
+                background: #ffffff;
+                border-radius: 30px;
+                text-align: center;
+              "
+            >
+              <div style="width: 100%; max-width: 489px; margin: 0 auto;">
+                <h1
+                  style="
+                    margin: 0;
+                    font-size: 24px;
+                    font-weight: 500;
+                    color: #1f1f1f;
+                  "
+                >
+                  Your OTP
+                </h1>
+                <p
+                  style="
+                    margin: 0;
+                    margin-top: 17px;
+                    font-size: 16px;
+                    font-weight: 500;
+                  "
+                >
+                  Hey  ' . htmlspecialchars($username) . ',
+                </p>
+                <p
+                  style="
+                    margin: 0;
+                    margin-top: 17px;
+                    font-weight: 500;
+                    letter-spacing: 0.56px;
+                  "
+                >
+                  Thank you for choosing PawShop Company. Use the following OTP
+                  to complete the procedure to change your email address. Do not share this code with others, including PawShop
+                  employees.
+                </p>
+                <p
+                  style="
+                    margin: 0;
+                    margin-top: 60px;
+                    font-size: 40px;
+                    font-weight: 600;
+                    letter-spacing: 25px;
+                    color: #ba3d4f;
+                  "
+                >
+                ' . htmlspecialchars($otp) . '
+                </p>
+              </div>
+            </div>
+    
+            <p
+              style="
+                max-width: 400px;
+                margin: 0 auto;
+                margin-top: 90px;
+                text-align: center;
+                font-weight: 500;
+                color: #8c8c8c;
+              "
+            >
+              Need help? Ask at
+              <a
+                href="mailto:sy_bf@hotmail.com"
+                style="color: #499fb6; text-decoration: none;"
+                >sy_bf@hotmail.com</a
+              >
+            </p>
+          </main>
+    
+          <footer
+            style="
+              width: 100%;
+              max-width: 490px;
+              margin: 20px auto 0;
+              text-align: center;
+              border-top: 1px solid #e6ebf1;
+            "
+          >
+            <p
+              style="
+                margin: 0;
+                margin-top: 40px;
+                font-size: 16px;
+                font-weight: 600;
+                color: #434343;
+              "
+            >
+              PawShop Company
+            </p>
+            </div>
+            <p style="margin: 0; margin-top: 16px; color: #434343;">
+              Copyright © 2024 Company. All rights reserved.
+            </p>
+          </footer>
+        </div>
+      </body>';
+            $mail->AltBody = 'Welcome to the PawShop Company. Here is your OTP: ' . htmlspecialchars($otp) . '';
+
+            $mail->send();
+        } catch (Exception $e) {
+            echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+        }
+    }
+
+    public function verifyOTP($otp,$user_id){
+        $sql = "SELECT * FROM users WHERE id = :user_id";
+        $stmt = $this->connect()->prepare($sql);
+        $stmt->execute(['user_id' => $user_id]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($user) {
+            $sql = "UPDATE users SET verified = 1 WHERE id = :user_id";
+            $stmt = $this->connect()->prepare($sql);
+            return $stmt->execute(['user_id' => $user_id]);
+        } else {
+            return false;
+        }
     }
 }

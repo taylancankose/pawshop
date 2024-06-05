@@ -54,7 +54,12 @@ if(isset($_POST['register'])) {
 
     if(empty($username_err) && empty($email_err) && empty($password_err) && empty($confirm_password_err)) {
         if($product->registerUser($username, $email, $password)) {
-            header('Location: login.php');
+            $otp = rand(100000, 999999);
+            $_SESSION['otp'] = $otp;
+            $_SESSION['username_tmp'] = $username;
+            $product->sendOTP($email, $username,$otp);
+            $timestamp = time();
+            header("Location: verify.php?success=$timestamp");
             exit;
         } else {
             echo "Error occurred while registering.";
