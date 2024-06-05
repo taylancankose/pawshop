@@ -68,6 +68,12 @@ class Products extends Db
         return $stmt->fetch();
     }
 
+    public function updateUserType($user_id, $user_type){
+        $sql = "UPDATE users SET user_type =:user_type WHERE id=:user_id";
+        $stmt = $this->connect()->prepare($sql);
+        return $stmt->execute(['user_id' => $user_id, 'user_type' => $user_type]);
+    }
+
     public function getUserByUsername($username)
     {
         $sql = "SELECT * FROM users WHERE username=:username";
