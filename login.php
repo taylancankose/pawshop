@@ -70,12 +70,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <label for="email" class="col-sm-2 col-form-label">Email</label>
             <div class="col-sm-10">
                 <input type="email" class="form-control" id="email" placeholder="email@example.com" name="email">
+                <?php if (!empty($email_err)) { ?>
+                    <span class="text-danger"><?php echo $email_err; ?></span>
+                <?php } ?>
             </div>
         </div>
         <div class="form-group mb-4">
             <label for="password" class="col-sm-2 col-form-label">Password</label>
             <div class="col-sm-10">
                 <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                <?php if (!empty($password_err)) { ?>
+                    <span class="text-danger"><?php echo $password_err; ?></span>
+                <?php } ?>
             </div>
         </div>
         <div class="form-group">

@@ -72,6 +72,9 @@ if (isset($_POST['firstName'])) {
                 <input type="text" class="form-control" id="firstName" name="firstName" placeholder="" value="" required="">
                 <div class="invalid-feedback">
                     Valid first name is required.
+                    <?php if (!empty($firstName_err)) { ?>
+                    <span class="text-danger"><?php echo $firstName_err; ?></span>
+                <?php } ?>
                 </div>
             </div>
             <div class="col-md-6 mb-3">
@@ -79,6 +82,9 @@ if (isset($_POST['firstName'])) {
                 <input type="text" class="form-control" id="lastName" name="lastName" placeholder="" value="" required="">
                 <div class="invalid-feedback">
                     Valid last name is required.
+                    <?php if (!empty($lastName_err)) { ?>
+                    <span class="text-danger"><?php echo $lastName_err; ?></span>
+                <?php } ?>
                 </div>
             </div>
         </div>
@@ -88,6 +94,9 @@ if (isset($_POST['firstName'])) {
             <input type="email" class="form-control" name="email" id="email" placeholder="you@example.com">
             <div class="invalid-feedback">
                 Please enter a valid email address for shipping updates.
+                <?php if (!empty($email_err)) { ?>
+                    <span class="text-danger"><?php echo $email_err; ?></span>
+                <?php } ?>
             </div>
         </div>
 
@@ -96,6 +105,9 @@ if (isset($_POST['firstName'])) {
             <textarea required="" id="address" name="address" class="form-control" rows="3"></textarea>
             <div class="invalid-feedback">
                 Please enter your shipping address.
+                <?php if (!empty($address_err)) { ?>
+                    <span class="text-danger"><?php echo $address_err; ?></span>
+                <?php } ?>
             </div>
         </div>
 

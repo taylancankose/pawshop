@@ -29,13 +29,24 @@ class Products extends Db
 
     public function registerUser(string $username, string $email, string $password)
     {
-        $sql_check = "SELECT COUNT(*) FROM users WHERE email = :email";
-        $stmt_check = $this->connect()->prepare($sql_check);
-        $stmt_check->execute(['email' => $email]);
-        $email_exists = $stmt_check->fetchColumn();
+        // Check if the username already exists
+        $sql_check_username = "SELECT COUNT(*) FROM users WHERE username = :username";
+        $stmt_check_username = $this->connect()->prepare($sql_check_username);
+        $stmt_check_username->execute(['username' => $username]);
+        $username_exists = $stmt_check_username->fetchColumn();
+
+        if ($username_exists > 0) {
+            return "Username already exists";
+        }
+
+        // Check if the email already exists
+        $sql_check_email = "SELECT COUNT(*) FROM users WHERE email = :email";
+        $stmt_check_email = $this->connect()->prepare($sql_check_email);
+        $stmt_check_email->execute(['email' => $email]);
+        $email_exists = $stmt_check_email->fetchColumn();
 
         if ($email_exists > 0) {
-            exit();
+            return "Email already exists";
         }
 
         $sql = "INSERT INTO users (username, email, password) VALUES (:username, :email, :password)";
