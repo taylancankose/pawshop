@@ -36,8 +36,8 @@ if(isset($_POST["user_role"])){
     <label for="exampleFormControlSelect1">User Role</label>
     <form method="POST">
     <select name="user_role" class="form-control" id="user_role">
-      <option <?php echo $user->user_type == "user" ? "selected" : "" ?>>User</option>
-      <option <?php echo $user->user_type == "admin" ? "selected" : "" ?>>Admin</option>
+      <option value="user" <?php echo $user->user_type == "user" ? "selected" : "" ?>>User</option>
+      <option value="admin" <?php echo $user->user_type == "admin" ? "selected" : "" ?>>Admin</option>
     </select>
   </div>
     <button type="submit" href="#" class="btn btn-primary mt-4">Button</button>
