@@ -1,13 +1,14 @@
 <?php
 include_once 'classes/db.class.php';
-include_once 'classes/product.class.php';
+include_once 'classes/utils.class.php';
+include_once 'classes/auth.class.php';
 require_once "classes/vars.php";
 
+$utils = new Utils();
+$auth = new Auth();
 
-$product = new Products();
-
-$is_admin = $product->isAdmin();
-$users = $product->getUsers();
+$is_admin = $utils->isAdmin();
+$users = $auth->getUsers();
 
 if (!$is_admin) {
     header("Location: index.php");

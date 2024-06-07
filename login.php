@@ -1,14 +1,19 @@
 <?php
 include_once 'classes/db.class.php';
 include_once 'classes/product.class.php';
+include_once 'classes/utils.class.php';
+include_once 'classes/auth.class.php';
+
 ?>
 
 <?php
  
 session_start(); // Start the session
 $product = new Products();
+$utils = new Utils();
+$auth = new Auth();
 
-$is_loggedIn = $product->isLoggedIn();
+$is_loggedIn = $utils->isLoggedIn();
 
 if($is_loggedIn){
     header("Location: index.php");
@@ -35,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Check input errors before querying the database
     if (empty($email_err) && empty($password_err)) {
-        $user = $product->login($email, $password);
+        $user = $auth->login($email, $password);
 
         if($user){
             $_SESSION["loggedIn"] = true;

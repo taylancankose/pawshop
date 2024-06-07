@@ -1,22 +1,24 @@
 <?php
 include_once 'classes/db.class.php';
-include_once 'classes/product.class.php';
+include_once 'classes/utils.class.php';
+include_once 'classes/auth.class.php';
 require_once "classes/vars.php";
 
 
-$product = new Products();
+$utils = new Utils();
+$auth = new Auth();
 
-$is_admin = $product->isAdmin();
+$is_admin = $utils->isAdmin();
 
 if (!$is_admin) {
     header("Location: index.php");
 }
 
 $user_name = $_GET["user_name"];
-$user = $product->getUserByUsername($user_name);
+$user = $auth->getUserByUsername($user_name);
 if(isset($_POST["user_role"])){
     $user_role = $_POST["user_role"];
-    if($product->updateUserType($user->id, $user_role)){
+    if($auth->updateUserType($user->id, $user_role)){
         header("Location: admin-users.php");
     }
 }
@@ -27,7 +29,7 @@ if(isset($_POST["user_role"])){
 
 
 <div class="container">
-    <?php $user = $product->getUserByUsername($user_name); ?>
+    <?php $user = $auth->getUserByUsername($user_name); ?>
 <div class="card mt-4 w-100">
   <div class="card-body">
     <h5 class="card-title"><?php echo $user->username ?></h5>

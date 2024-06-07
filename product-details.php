@@ -1,12 +1,17 @@
 <?php
 include_once 'classes/db.class.php';
 include_once 'classes/product.class.php';
+include_once 'classes/order.class.php';
+include_once 'classes/auth.class.php';
+
 ?>
 
 <?php
 require_once "classes/vars.php";
 
 $product = new Products();
+$order = new Orders();
+$auth = new Auth();
 
 if (!isset($_GET["id"]) or !is_numeric($_GET["id"])) {
     header("Location: index.php");
@@ -15,12 +20,23 @@ if (!isset($_GET["id"]) or !is_numeric($_GET["id"])) {
 $result = $product->getProductById($_GET["id"]);
 $categories = $product->getCategoriesByProductId($result->id);
 $alternative_products = $product->getProductsByCategoryId($categories[0]->id);
+$user = $auth->getUserByUsername($_SESSION["username"]);
 
 if (!$result) {
     header("Location: index.php");
 }
 
+if(isset($_POST["product_id"])){
+    $user_id = $user->id; // Assuming username holds user ID
+    $product_id =$_POST["product_id"];
+    $qty = 1; // Assuming quantity is always 1 (you can modify this)
 
+    if ($order->addToCart($user_id, $product_id, $qty)) {
+        $message= "<div class='alert alert-success '>Ürün sepete eklendi. </div>";
+      } else {
+          $message= "<span class='alert alert-danger'>Ürün sepete eklenemedi. </span>";
+    }
+}
 
 ?>
 
@@ -39,9 +55,12 @@ if (!$result) {
                         <h1 class="display-5 fw-bolder"><?php echo $result->title ?></h1>
                         <div class="">
                             <h3>$40.00</h3>
-                            <button class="btn btn-outline-dark" type="button">
-                                Add to cart
-                            </button>
+                            <?php if(isset($_SESSION["user_type"]) && $_SESSION["user_type"] == "user") :?>
+                                <form method="POST">
+                                <input type="hidden" name="product_id" value="<?php echo $result->id ?>">
+                                <button type="submit" name="add_to_cart" class="btn btn-lg btn-outline-secondary my-2">Add to Cart</button>
+                            </form>
+                            <?php endif ;?>
                         </div>
                         <p class="lead">
                             <?php echo html_entity_decode($result->description) ?>

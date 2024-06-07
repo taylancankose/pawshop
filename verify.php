@@ -1,6 +1,9 @@
 <?php
 include_once 'classes/db.class.php';
 include_once 'classes/product.class.php';
+include_once 'classes/auth.class.php';
+include_once 'classes/utils.class.php';
+
 ?>
 
 
@@ -8,7 +11,12 @@ include_once 'classes/product.class.php';
 require_once "classes/vars.php";
 
 $product = new Products();
-$user = $product->getUserByUsername($_SESSION["username_tmp"]);
+$auth = new Auth();
+$utils = new Utils();
+
+$verify_err = "";
+
+$user = $auth->getUserByUsername($_SESSION["username_tmp"]);
 
 if($user->verified == 1 || !isset($_GET["success"])){
     header("Location: index.php");
@@ -18,13 +26,17 @@ $otp = $_SESSION["otp"];
 if(isset($_POST["otp"])){
     $otp_input = $_POST["otp"];
     if(trim($otp_input) == $otp){
-        if($product->verifyOTP($otp, $user->id)){
-            echo "Verified";
-            session_destroy();
-            header('Location: login.php');
-        }else{
-            echo "Failed";
+        if(empty($verify_err)){
+            if($utils->verifyOTP($otp, $user->id)){
+                echo "Verified";
+                session_destroy();
+                header('Location: login.php');
+            }else{
+                echo "Failed";
+            }
         }
+    }else{
+        $verify_err = "OTPs not match";
     }
 }
 ?>
@@ -72,6 +84,7 @@ if(isset($_POST["otp"])){
         <h5 class="m-0">Email verification</h5><span class="mobile-text">Enter the code we just send on your email</span>
         <form method="POST" class="mt-5">
             <input type="number" name="otp" class="form-control" autofocus="" maxlength="6">
+            <div class="text-danger mt-2"><?php echo $verify_err ?></div>
             <button name="verify" class="btn btn-primary mt-4">Verify</button>
         </form>
 

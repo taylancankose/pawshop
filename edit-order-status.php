@@ -1,31 +1,37 @@
 <?php
 include_once 'classes/db.class.php';
 include_once 'classes/product.class.php';
+include_once 'classes/utils.class.php';
+include_once 'classes/order.class.php';
+include_once 'classes/auth.class.php';
+include_once "classes/vars.php";
 ?>
 
 
 <?php
 
-session_start();
 
 $order_number = $_GET["order"];
 
 
 $product = new Products();
+$utils = new Utils();
+$auth = new Auth();
+$orders = new Orders();
 
-$is_admin = $product->isAdmin();
+$is_admin = $utils->isAdmin();
 
 if(!$is_admin){
     header("Location: index.php");
 }
 
-$order = $product->getOrdersByOrderNumber($order_number);
-$products = $product->getOrderProductsByOrderId($order->order_id);
-$address = $product->getAddressById($order->address_id);
+$order = $orders->getOrdersByOrderNumber($order_number);
+$products = $orders->getOrderProductsByOrderId($order->order_id);
+$address = $orders->getAddressById($order->address_id);
 
 if (isset($_POST["status"])) {
     $status = $_POST["status"];
-    $product->editOrderStatus($order->order_id, $status);
+    $orders->editOrderStatus($order->order_id, $status);
     header("Location: admin-orders.php");
 } else {
     // Status parametresi yoksa, uygun bir hata mesajı gösterilebilir veya varsayılan bir değer atanabilir.

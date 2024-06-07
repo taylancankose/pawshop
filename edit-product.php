@@ -1,14 +1,16 @@
 <?php
 include_once 'classes/db.class.php';
 include_once 'classes/product.class.php';
+include_once 'classes/utils.class.php';
 ?>
 
 <?php
 require_once "classes/vars.php";
  
 $product = new Products();
+$utils = new Utils();
 
-$is_admin = $product->isAdmin();
+$is_admin = $utils->isAdmin();
 
 if(!$is_admin){
     header("Location: index.php");
@@ -35,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Yeni bir dosya yüklendiyse
     if (!empty($_FILES["image"]["name"])) {
-        $result = $product->uploadImage($_FILES["image"]);
+        $result = $utils->uploadImage($_FILES["image"]);
 
         if ($result["isSuccess"] == 1) {
             $image = $result["image"]; // Yeni dosya adını al

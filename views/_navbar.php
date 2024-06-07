@@ -1,12 +1,14 @@
 <?php
 require_once "classes/vars.php";
-require_once "classes/product.class.php";
+require_once "classes/order.class.php";
+require_once "classes/auth.class.php";
 
-$product = new Products();
+$auth = new Auth();
+$order = new Orders();
 
 if(isset($_SESSION["username"])){
-    $user = $product->getUserByUsername($_SESSION["username"]) ;
-    $orders = $product->getOrders($user->id);
+    $user = $auth->getUserByUsername($_SESSION["username"]) ;
+    $orders = $order->getOrders($user->id);
 }
 
 
@@ -40,11 +42,11 @@ if(isset($_SESSION["username"])){
                         <a href="logout.php" class="nav-link">Logout</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link"><?php echo $_SESSION["username"] ?> My Account</a>
+                        <a class="nav-link"><?php echo $_SESSION["username"] ?> </a>
                     </li>
                     </li>
                     <?php
-                    $user = $product->getUser($_SESSION["username"]);
+                    $user = $auth->getUser($_SESSION["username"]);
                     if ($_SESSION["user_type"] == "admin") {
                         echo "<li class='nav-item dropdown'>
                         <a class='nav-link dropdown-toggle' href='#' id='navbarDropdown' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
@@ -62,11 +64,13 @@ if(isset($_SESSION["username"])){
                           </div>
                         </li>";
                     } else {
-                        echo "<li class='nav-item'>
+                        echo "
                         <a href='cart.php' class='nav-link'>
                           <i class='fa fa-shopping-cart '></i>
                         </a>
-                      </li>";
+                      </li>
+                      
+                      ";
                     }
                     ?>
                 <?php else : ?>

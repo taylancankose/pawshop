@@ -1,14 +1,19 @@
 <?php
 include_once 'classes/db.class.php';
 include_once 'classes/product.class.php';
+include_once 'classes/auth.class.php';
+include_once 'classes/order.class.php';
+
 ?>
 
 <?php
-include_once 'classes/product.class.php';
 
+$auth = new Auth();
 $product = new Products();
+$order = new Orders();
+
 $username = isset($_SESSION["username"]) ? $_SESSION["username"] : "";
-$user = $product->getUserByUsername($username);
+$user = $auth->getUserByUsername($username);
 $categoryId = "";
 $keyword = "";
 $page = 1;
@@ -35,7 +40,7 @@ if (!empty($_GET['cats'])) {
         $product_id =$_POST["product_id"];
         $qty = 1; // Assuming quantity is always 1 (you can modify this)
 
-        if ($product->addToCart($user_id, $product_id, $qty)) {
+        if ($order->addToCart($user_id, $product_id, $qty)) {
             $message= "<div class='alert alert-success '>Ürün sepete eklendi. </div>";
           } else {
               $message= "<span class='alert alert-danger'>Ürün sepete eklenemedi. </span>";

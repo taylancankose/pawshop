@@ -1,6 +1,10 @@
 <?php
 include_once 'classes/db.class.php';
 include_once 'classes/product.class.php';
+include_once 'classes/utils.class.php';
+include_once 'classes/auth.class.php';
+include_once 'classes/order.class.php';
+
 ?>
 
 <?php
@@ -9,7 +13,11 @@ session_start();
 $pageCount = isset($_GET["pageCount"]) ? $_GET["pageCount"] : 5;
 
 $product = new Products();
-$is_admin = $product->isAdmin();
+$utils = new Utils();
+$auth = new Auth();
+$orders = new Orders();
+
+$is_admin = $utils->isAdmin();
 
 if (!$is_admin) {
     header("Location: index.php");
@@ -19,13 +27,13 @@ $page = 1;
 if (isset($_GET["page"]) && is_numeric($_GET["page"])) $page = $_GET["page"];
 
 
-$user = $product->getUserByUsername($_SESSION["username"]);
-$result = $product->getAllOrders();
+$user = $auth->getUserByUsername($_SESSION["username"]);
+$result = $orders->getAllOrders();
 $filtered_results = [];
 
 $status = isset($_GET["status"]) ? $_GET["status"] : null;
 $page = isset($_GET["page"]) ? $_GET["page"] : 1; // Sayfa numarası varsayılan olarak 1 olarak belirlendi
-$filtered_results = $product->getAllOrdersByFilters($page, $status);
+$filtered_results = $orders->getAllOrdersByFilters($page, $status);
 $total_pages = $filtered_results['total_pages'];
 $results = $filtered_results['orders'];
 
@@ -340,7 +348,7 @@ $results = $filtered_results['orders'];
                 <tbody>
                     <?php if (!empty($filtered_results)) : ?>
                         <?php foreach ($results as $order) : ?>
-                            <?php $address = $product->getAddressById($order["address_id"]) ?>
+                            <?php $orders = new Orders(); $address = $orders->getAddressById($order["address_id"]) ?>
                             <tr>
                                 <td></td>
                                 <td><?php echo $order["username"] ?></td>
@@ -361,7 +369,7 @@ $results = $filtered_results['orders'];
                         <?php endforeach; ?>
                     <?php else : ?>
                         <?php foreach ($result as $order) : ?>
-                            <?php $address = $product->getAddressById($order->address_id) ?>
+                            <?php $address = $orders->getAddressById($order->address_id) ?>
                             <tr>
                                 <td></td>
                                 <td><a href="#"><?php echo $order->username ?></a></td>

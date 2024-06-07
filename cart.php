@@ -4,21 +4,29 @@
 <?php
 include_once 'classes/db.class.php';
 include_once 'classes/product.class.php';
+include_once 'classes/auth.class.php';
+include_once 'classes/utils.class.php';
+include_once 'classes/order.class.php';
+
 ?>
 
 <?php
 
 $product = new Products();
+$auth = new Auth();
+$utils = new Utils();
+$order = new Orders();
 
-$is_loggedIn = $product->isLoggedIn();
+
+$is_loggedIn = $utils->isLoggedIn();
 
 if (!$is_loggedIn) {
     header("Location: index.php");
 }
 
-$user = $product->getUserByUsername($_SESSION['username']);
-$addresses = $product->getAddressesByUser($user->id);
-$cart = $product->getCart($user->id);
+$user = $auth->getUserByUsername($_SESSION['username']);
+$addresses = $order->getAddressesByUser($user->id);
+$cart = $order->getCart($user->id);
 $total = 0;
 $shipping_price = 0;
 $final = 0;
@@ -41,24 +49,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["address"])) {
 
     if ($final > 0 && isset($selected_address) && isset($_POST["cc_name"]) && isset($_POST["cc_number"]) && isset($_POST["cc_expiration"]) && isset($_POST["cc_cvv"])) {
 
-        $product->createOrder($user->id, $selected_address, $final, $order_number);
-        $order_id = $product->getOrdersByOrderNumber($order_number)->order_id;
+        $order->createOrder($user->id, $selected_address, $final, $order_number);
+        $order_id = $order->getOrdersByOrderNumber($order_number)->order_id;
 
         if ($order_id) {
             // Add products to the order_products table
             foreach ($cart as $c) {
-                $product->addProductToOrder($order_id, $c->product_id, $c->qty);
+                $order->addProductToOrder($order_id, $c->product_id, $c->qty);
             }
             // Clear the cart
-            $product->clearCart($user->id);
+            $order->clearCart($user->id);
             header("Location: order-success.php?success=$order_number");
             exit;
         } else {
             echo "<div class='alert alert-danger'>Order creation failed.</div>";
         }
     }
-}else{
-    echo "<div class='alert alert-danger text-center h6'>Order creation failed.</div>";
 }
 
 

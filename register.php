@@ -1,6 +1,9 @@
 <?php
 include_once 'classes/db.class.php';
 include_once 'classes/product.class.php';
+include_once 'classes/utils.class.php';
+include_once 'classes/auth.class.php';
+
 ?>
 
 
@@ -8,16 +11,14 @@ include_once 'classes/product.class.php';
 require_once "classes/vars.php";
 
 $product = new Products();
+$utils = new Utils();
+$auth = new Auth();
 
-$is_loggedIn = $product->isLoggedIn();
+$is_loggedIn = $utils->isLoggedIn();
 
 if ($is_loggedIn) {
     header("Location: index.php");
 }
-
-require_once "classes/vars.php";
-require_once "classes/product.class.php";
-
 
 $username = $email = $password = $confirm_password = "";
 $username_err = $email_err = $password_err = $confirm_password_err = "";
@@ -55,7 +56,7 @@ if (isset($_POST['register'])) {
     }
 
     if (empty($username_err) && empty($email_err) && empty($password_err) && empty($confirm_password_err)) {
-        $result_register = $product->registerUser($username, $email, $password);
+        $result_register = $auth->registerUser($username, $email, $password);
         if ($result_register === "Username already exists") {
             $username_err = "Username already exists";
         } else if ($result_register === "Email already exists") {
@@ -64,7 +65,7 @@ if (isset($_POST['register'])) {
             $otp = rand(100000, 999999);
             $_SESSION['otp'] = $otp;
             $_SESSION['username_tmp'] = $username;
-            $product->sendOTP($email, $username, $otp);
+            $utils->sendOTP($email, $username, $otp);
             $timestamp = time();
             header("Location: verify.php?success=$timestamp"); // verify.php'ye yönlendirme
             exit;

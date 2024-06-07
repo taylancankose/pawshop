@@ -1,6 +1,9 @@
 <?php
 include_once 'classes/db.class.php';
 include_once 'classes/product.class.php';
+include_once 'classes/auth.class.php';
+include_once 'classes/utils.class.php';
+
 ?>
 
 <?php
@@ -15,8 +18,10 @@ $title = $description = $image = "";
 $price = 0;
 $title_err = $description_err = $price_err = $err = $image_err = "";
 $product = new Products();
+$auth = new Auth();
+$utils = new Utils();
 
-$is_admin = $product->isAdmin();
+$is_admin = $utils->isAdmin();
 
 if(!$is_admin){
     header("Location: index.php");
@@ -33,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else if (strlen($input_title) < 5) {
         $title_err = "Title can not be less than 5 characters";
     } else {
-        $title = $product->control_input($input_title);
+        $title = $utils->control_input($input_title);
     }
 
     $input_description = trim($_POST["description"]);
@@ -42,13 +47,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else if (strlen($input_description) < 15) {
         $description_err = "Description can not be less than 15 characters";
     } else {
-        $description = $product->control_input($input_description);
+        $description = $utils->control_input($input_description);
     }
 
     if (empty($_FILES["image"]["name"])) {
         $image_err = "Please select an image";
     } else {
-        $result = $product->uploadImage($_FILES["image"]);
+        $result = $utils->uploadImage($_FILES["image"]);
         if ($result["isSuccess"] == 0) {
             $image_err = $result["message"];
         } else {

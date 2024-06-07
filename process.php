@@ -1,1 +1,0 @@
-<?php include_once "add-product.php"; ?>  <?php include_once "upload.php"; ?>

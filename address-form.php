@@ -3,13 +3,20 @@ session_start();
 
 include_once "views/_header.php";
 include_once "views/_navbar.php";
+include_once 'classes/utils.class.php';
+include_once 'classes/order.class.php';
+include_once 'classes/auth.class.php';
+include_once 'classes/product.class.php';
 include_once "classes/vars.php";
 
 $product = new Products();
+$utils = new Utils();
+$auth = new Auth();
+$order = new Orders();
 
-$is_admin = $product->isAdmin();
+$is_loggedIn = $utils->isLoggedIn();
 
-if(!$is_admin){
+if(!$is_loggedIn){
     header("Location: index.php");
 }
 
@@ -17,7 +24,7 @@ $firstName = $lastName = $email = $address = "";
 $firstName_err = $lastName_err = $email_err = $address_err = "";
 
 $username = $_SESSION["username"];
-$user = $product->getUserByUsername($username);
+$user = $auth->getUserByUsername($username);
 
 if (isset($_POST['firstName'])) {
     $firstName = $_POST["firstName"];
@@ -51,7 +58,7 @@ if (isset($_POST['firstName'])) {
 
 
     if (empty($firstName_err) && empty($email_err) && empty($lastName_err) && empty($address_err)) {
-        if ($product->createAddress($firstName, $lastName, $email, $address, $country, $state, $zip, $user->id)) {
+        if ($order->createAddress($firstName, $lastName, $email, $address, $country, $state, $zip, $user->id)) {
             header('Location: cart.php');
             exit;
         } else {

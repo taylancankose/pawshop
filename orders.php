@@ -1,23 +1,31 @@
 <?php
 include_once 'classes/db.class.php';
 include_once 'classes/product.class.php';
+include_once 'classes/auth.class.php';
+include_once 'classes/utils.class.php';
+include_once 'classes/order.class.php';
+
 ?>
 
 <?php
 session_start();
 
 $product = new Products();
-$user = $product->getUserByUsername($_SESSION["username"]);
+$auth = new Auth();
+$utils = new Utils();
+$orders_func = new Orders();
+
+$user = $auth->getUserByUsername($_SESSION["username"]);
 $page = 1;
 
-$is_loggedIn = $product->isLoggedIn();
+$is_loggedIn = $utils->isLoggedIn();
 if (isset($_GET["page"]) && is_numeric($_GET["page"])) $page = $_GET["page"];
 
 if (!$is_loggedIn) {
     header("Location: index.php");
 }
 
-$orders = $product->getOrdersByFilters($user->id, $page);
+$orders = $orders_func->getOrdersByFilters($user->id, $page);
 $total_pages = $orders['total_pages'];
 $result = $orders['data'];
 ?>
@@ -307,7 +315,7 @@ $result = $orders['data'];
                 </thead>
                 <tbody>
                     <?php foreach ($result as $order) : ?>
-                        <?php $address = $product->getAddressById($order->address_id) ?>
+                        <?php $address = $orders_func->getAddressById($order->address_id) ?>
                         <tr>
                             <td class="w-50"><?php echo $order->title ?></td>
                             <td><?php echo $address->state ?></td>

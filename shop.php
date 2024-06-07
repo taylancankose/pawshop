@@ -1,15 +1,28 @@
 <?php
 include_once 'classes/product.class.php';
+include_once 'classes/auth.class.php';
+include_once 'classes/order.class.php';
+
+session_start();
 
 $product = new Products();
+$auth = new Auth();
+$order_func = new Orders();
+
+
+$username = $_SESSION["username"] ;
+$user = $auth->getUserByUsername($username);
 
 $categoryId = "";
-$keyword = "";
 $page = 1;
 
-if (isset($_GET["categoryid"]) && is_numeric($_GET["categoryid"])) $categoryId = $_GET["categoryid"];
-if (isset($_GET["q"])) $keyword = $_GET["q"];
-if (isset($_GET["page"]) && is_numeric($_GET["page"])) $page = $_GET["page"];
+if (isset($_GET["categoryid"]) && is_numeric($_GET["categoryid"])) {
+    $categoryId = $_GET["categoryid"];
+}
+
+if (isset($_GET["page"]) && is_numeric($_GET["page"])) {
+    $page = $_GET["page"];
+}
 
 $filtered_products = [];
 
@@ -17,9 +30,22 @@ if (!empty($_GET['cats'])) {
     $categoryId = $_GET['cats'];
     $filtered_products = $product->getProductsByCategoryId($categoryId); 
 } else {
-    $productsData = $product->getProductsByFilters($categoryId, $keyword, $page);
+    // Anahtar kelime filtresi burada eklenebilir
+    $productsData = $product->getProductsByFilters($categoryId, $page);
     $total_pages = $productsData['total_pages'];
     $result = $productsData['data'];
+}
+
+
+if(isset($_POST["product_id"])){
+    $user_id = $user->id; // Assuming username holds user ID
+    $product_id =$_POST["product_id"];
+    $qty = 1; // Assuming quantity is always 1 (you can modify this)
+    if ($order_func->addToCart($user_id, $product_id, $qty)) {
+        $message= "<div class='alert alert-success '>Ürün sepete eklendi. </div>";
+      } else {
+          $message= "<span class='alert alert-danger'>Ürün sepete eklenemedi. </span>";
+    }
 }
 ?>
 
@@ -57,7 +83,12 @@ if (!empty($_GET['cats'])) {
                                 </a>
                             </h4>
                             <h4>$<?php echo $item->price ?></h4>
-                            <button type="button" class="btn btn-lg btn-outline-secondary my-2">Add to Cart</button>
+                            <?php if(isset($_SESSION["user_type"]) && $_SESSION["user_type"] == "user") :?>
+                                <form method="POST">
+                                <input type="hidden" name="product_id" value="<?php echo $item->id ?>">
+                                <button type="submit" name="add_to_cart" class="btn btn-lg btn-outline-secondary my-2">Add to Cart</button>
+                            </form>
+                            <?php endif ;?>
                         </div>
                     </div>
                 <?php endif; ?>
@@ -75,7 +106,13 @@ if (!empty($_GET['cats'])) {
                                 </a>
                             </h4>
                             <h4>$<?php echo $item->price ?></h4>
-                            <button type="button" class="btn btn-lg btn-outline-secondary my-2">Add to Cart</button>
+                            <?php if(isset($_SESSION["user_type"]) && $_SESSION["user_type"] == "user") :?>
+                                <form method="POST">
+                                <input type="hidden" name="product_id" value="<?php echo $item->id ?>">
+                                <button type="submit" name="add_to_cart" class="btn btn-lg btn-outline-secondary my-2">Add to Cart</button>
+                            </form>
+                            <?php endif ;?>
+
                         </div>
                     </div>
                 <?php endif; ?>
