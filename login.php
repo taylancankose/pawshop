@@ -36,12 +36,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Check input errors before querying the database
     if (empty($email_err) && empty($password_err)) {
         $user = $product->login($email, $password);
-        print_r($user);
 
-        echo $email;
-        echo $password;
         if($user){
-            print_r($user);
             $_SESSION["loggedIn"] = true;
             $_SESSION["id"] = $user->id;
             $_SESSION["username"] = $user->username;
@@ -49,7 +45,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header("location: index.php");
             exit;
         } else {
-            print_r($user);
             $login_err = "Invalid email or password.".$user;
         }
     }
