@@ -10,9 +10,10 @@ $auth = new Auth();
 $order_func = new Orders();
 
 
-$username = $_SESSION["username"] ;
+if(isset($_POST['username'])){
+$username = $_POST['username'];
 $user = $auth->getUserByUsername($username);
-
+}
 $categoryId = "";
 $page = 1;
 
