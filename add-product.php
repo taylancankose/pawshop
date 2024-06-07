@@ -29,7 +29,7 @@ if(!$is_admin){
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $input_title = trim($_POST["title"]);
+    $input_title = htmlspecialchars(trim($_POST["title"]));
      // error management
     if (empty($input_title)) {
         $title_err = "Title can not be empty";
@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $title = $utils->control_input($input_title);
     }
 
-    $input_description = trim($_POST["description"]);
+    $input_description = htmlspecialchars(trim($_POST["description"]));
     if (empty($input_description)) {
         $description_err = "Description can not be empty";
     } else if (strlen($input_description) < 15) {

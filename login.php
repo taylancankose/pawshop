@@ -28,14 +28,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty(trim($_POST["email"]))) {
         $email_err = "You must enter an email";
     } else {
-        $email = trim($_POST["email"]);
+        $email = htmlspecialchars(trim($_POST["email"]));
     }
 
     // Validate password
     if (empty(trim($_POST["password"]))) {
         $password_err = "You must enter a password";
     } else {
-        $password = trim($_POST["password"]);
+        $password = htmlspecialchars(trim($_POST["password"]));
     }
 
     // Check input errors before querying the database

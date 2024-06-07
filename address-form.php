@@ -27,13 +27,13 @@ $username = $_SESSION["username"];
 $user = $auth->getUserByUsername($username);
 
 if (isset($_POST['firstName'])) {
-    $firstName = $_POST["firstName"];
-    $email = $_POST["email"];
-    $lastName = $_POST["lastName"];
-    $address = $_POST["address"];
+    $firstName = htmlspecialchars($_POST["firstName"]);
+    $email = htmlspecialchars($_POST["email"]);
+    $lastName = htmlspecialchars($_POST["lastName"]);
+    $address = htmlspecialchars($_POST["address"]);
     $country = $_POST["country"];
-    $state = $_POST["state"];
-    $zip = $_POST["zip"];
+    $state = htmlspecialchars($_POST["state"]);
+    $zip = htmlspecialchars($_POST["zip"]);
 
 
     if (empty($firstName)) {

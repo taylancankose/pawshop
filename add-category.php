@@ -25,7 +25,7 @@ $categoryname_err = "";
 
 if ($_SERVER["REQUEST_METHOD"]=="POST") {
 
-    $input_categoryname = trim($_POST["category"]);
+    $input_categoryname = htmlspecialchars(trim($_POST["category"]));
 
     if(empty($input_categoryname)) {
         $categoryname_err = "Category cannot be empty";

@@ -29,9 +29,9 @@ if (!isset($categories)) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $title = $_POST["title"];
-    $description = $_POST["description"];
-    $price = $_POST["price"];
+    $title = htmlspecialchars($_POST["title"]);
+    $description = htmlspecialchars($_POST["description"]);
+    $price = htmlspecialchars($_POST["price"]);
     $stock = isset($_POST["stock"]) ? 1 : 0; // Checkbox değeri kontrolü
     $image = $_POST["image"];
 

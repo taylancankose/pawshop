@@ -23,7 +23,7 @@ $result = $product->getCategoryById($id);
  
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $categoryname = $_POST["categoryname"];
+    $categoryname = htmlspecialchars($_POST["categoryname"]);
     $isActive = isset($_POST["is_active"]) ? 1 : 0;
 
     if ($product->editCategory($id, $categoryname, $isActive)) {

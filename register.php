@@ -24,10 +24,10 @@ $username = $email = $password = $confirm_password = "";
 $username_err = $email_err = $password_err = $confirm_password_err = "";
 
 if (isset($_POST['register'])) {
-    $username = $_POST["username"];
-    $email = $_POST["email"];
-    $password = $_POST["password"];
-    $confirm_password = $_POST["confirmPassword"];
+    $username = htmlspecialchars($_POST["username"]);
+    $email = htmlspecialchars($_POST["email"]);
+    $password = htmlspecialchars($_POST["password"]);
+    $confirm_password = htmlspecialchars($_POST["confirmPassword"]);
 
     if (empty($username)) {
         $username_err = "You must enter a username";
